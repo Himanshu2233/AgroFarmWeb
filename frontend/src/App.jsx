@@ -15,6 +15,7 @@ import ResetPassword from './pages/ResetPassword';
 
 // Protected Pages
 import Bookings from './pages/Bookings';
+import Profile from './pages/Profile';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -43,6 +44,11 @@ function App() {
         <Route path="/bookings" element={
           <ProtectedRoute>
             <Bookings />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile />
           </ProtectedRoute>
         } />
 

@@ -6,7 +6,9 @@ import {
   verifyEmail, 
   resendVerification,
   forgotPassword,
-  resetPassword 
+  resetPassword,
+  updateProfile,
+  changePassword
 } from '../../Controller/Auth/AuthController.js';
 import { authMiddleware } from '../../Middleware/token-middleware.js';
 
@@ -22,5 +24,7 @@ router.post('/reset-password/:token', resetPassword);
 
 // Protected routes
 router.get('/me', authMiddleware, getMe);
+router.put('/update-profile', authMiddleware, updateProfile);
+router.put('/change-password', authMiddleware, changePassword);
 
 export default router;

@@ -1,14 +1,28 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLogout = () => {
     logout();
+    setIsDropdownOpen(false);
     navigate('/');
   };
 
@@ -57,17 +71,62 @@ export default function Navbar() {
         {/* Auth Buttons */}
         <div className="hidden md:flex gap-3 items-center">
           {user ? (
-            <>
-              <span className="text-white">
-                {user.role === 'admin' ? '👑' : '👋'} {user.name}
-              </span>
+            <div className="relative" ref={dropdownRef}>
               <button
-                onClick={handleLogout}
-                className="px-5 py-2 rounded-full border-2 border-white bg-transparent text-white font-medium hover:bg-white hover:text-green-800 transition"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-700 text-white hover:bg-green-600 transition"
               >
-                Logout
+                <span className="w-8 h-8 bg-white text-green-800 rounded-full flex items-center justify-center font-bold">
+                  {user.name?.charAt(0).toUpperCase()}
+                </span>
+                <span>{user.name}</span>
+                <span className="text-xs">{isDropdownOpen ? '▲' : '▼'}</span>
               </button>
-            </>
+
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                  <div className="px-4 py-2 border-b">
+                    <p className="font-medium text-gray-800">{user.name}</p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                    }`}>
+                      {user.role === 'admin' ? '👑 Admin' : '👤 Customer'}
+                    </span>
+                  </div>
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsDropdownOpen(false)}
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 no-underline"
+                  >
+                    👤 My Profile
+                  </Link>
+                  <Link
+                    to="/bookings"
+                    onClick={() => setIsDropdownOpen(false)}
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 no-underline"
+                  >
+                    📅 My Bookings
+                  </Link>
+                  {user.role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      onClick={() => setIsDropdownOpen(false)}
+                      className="block px-4 py-2 text-purple-700 hover:bg-gray-100 no-underline"
+                    >
+                      🛠️ Admin Dashboard
+                    </Link>
+                  )}
+                  <hr className="my-2" />
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
+                  >
+                    🚪 Logout
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <>
               <Link
@@ -102,7 +161,10 @@ export default function Navbar() {
           <Link to="/products" className="text-white no-underline">🥬 Products</Link>
           <Link to="/animals" className="text-white no-underline">🐄 Animals</Link>
           {user && (
-            <Link to="/bookings" className="text-white no-underline">📅 My Bookings</Link>
+            <>
+              <Link to="/profile" className="text-white no-underline">👤 My Profile</Link>
+              <Link to="/bookings" className="text-white no-underline">📅 My Bookings</Link>
+            </>
           )}
           {user && user.role === 'admin' && (
             <Link to="/admin" className="text-yellow-300 no-underline">🛠️ Admin Dashboard</Link>
@@ -113,7 +175,7 @@ export default function Navbar() {
                 onClick={handleLogout}
                 className="px-4 py-2 rounded-full border-2 border-white text-white"
               >
-                Logout
+                🚪 Logout
               </button>
             ) : (
               <>
