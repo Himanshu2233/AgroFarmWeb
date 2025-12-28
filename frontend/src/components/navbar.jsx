@@ -1,59 +1,93 @@
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <nav className="bg-green-800 px-6 py-4 shadow-md">
       <div className="flex justify-between items-center max-w-6xl mx-auto">
-        
         {/* Logo */}
-        <div className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2">
           <span className="text-3xl">🌾</span>
           <h1 className="text-white text-2xl font-bold">AgroFarm</h1>
-        </div>
+        </Link>
 
         {/* Navigation Links */}
         <ul className="hidden md:flex gap-8 list-none m-0 p-0">
           <li>
-            <a href="/" className="text-white no-underline font-medium hover:text-green-300 transition">
+            <Link to="/" className="text-white no-underline font-medium hover:text-green-300 transition">
               🏠 Home
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="/products" className="text-white no-underline font-medium hover:text-green-300 transition">
+            <Link to="/products" className="text-white no-underline font-medium hover:text-green-300 transition">
               🥬 Products
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="/animals" className="text-white no-underline font-medium hover:text-green-300 transition">
+            <Link to="/animals" className="text-white no-underline font-medium hover:text-green-300 transition">
               🐄 Animals
-            </a>
+            </Link>
           </li>
-          <li>
-            <a href="/bookings" className="text-white no-underline font-medium hover:text-green-300 transition">
-              📅 My Bookings
-            </a>
-          </li>
-          <li>
-            <a href="/about" className="text-white no-underline font-medium hover:text-green-300 transition">
-              ℹ️ About
-            </a>
-          </li>
+          {user && (
+            <li>
+              <Link to="/bookings" className="text-white no-underline font-medium hover:text-green-300 transition">
+                📅 My Bookings
+              </Link>
+            </li>
+          )}
+          {user && user.role === 'admin' && (
+            <li>
+              <Link to="/admin" className="text-yellow-300 no-underline font-medium hover:text-yellow-100 transition">
+                🛠️ Admin
+              </Link>
+            </li>
+          )}
         </ul>
 
         {/* Auth Buttons */}
-        <div className="hidden md:flex gap-3">
-          <button className="px-5 py-2 rounded-full border-2 border-white bg-transparent text-white font-medium cursor-pointer hover:bg-white hover:text-green-800 transition">
-            Login
-          </button>
-          <button className="px-5 py-2 rounded-full border-none bg-orange-400 text-white font-medium cursor-pointer hover:bg-orange-500 transition">
-            Register
-          </button>
+        <div className="hidden md:flex gap-3 items-center">
+          {user ? (
+            <>
+              <span className="text-white">
+                {user.role === 'admin' ? '👑' : '👋'} {user.name}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="px-5 py-2 rounded-full border-2 border-white bg-transparent text-white font-medium hover:bg-white hover:text-green-800 transition"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="px-5 py-2 rounded-full border-2 border-white bg-transparent text-white font-medium hover:bg-white hover:text-green-800 transition"
+              >
+                Login
+              </Link>
+              <Link
+                to="/register"
+                className="px-5 py-2 rounded-full bg-orange-400 text-white font-medium hover:bg-orange-500 transition"
+              >
+                Register
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
-        <button 
+        <button
           className="md:hidden text-white text-2xl"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
@@ -64,14 +98,33 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden mt-4 flex flex-col gap-4">
-          <a href="/" className="text-white no-underline">🏠 Home</a>
-          <a href="/products" className="text-white no-underline">🥬 Products</a>
-          <a href="/animals" className="text-white no-underline">🐄 Animals</a>
-          <a href="/bookings" className="text-white no-underline">📅 My Bookings</a>
-          <a href="/about" className="text-white no-underline">ℹ️ About</a>
+          <Link to="/" className="text-white no-underline">🏠 Home</Link>
+          <Link to="/products" className="text-white no-underline">🥬 Products</Link>
+          <Link to="/animals" className="text-white no-underline">🐄 Animals</Link>
+          {user && (
+            <Link to="/bookings" className="text-white no-underline">📅 My Bookings</Link>
+          )}
+          {user && user.role === 'admin' && (
+            <Link to="/admin" className="text-yellow-300 no-underline">🛠️ Admin Dashboard</Link>
+          )}
           <div className="flex gap-3 mt-2">
-            <button className="px-4 py-2 rounded-full border-2 border-white bg-transparent text-white">Login</button>
-            <button className="px-4 py-2 rounded-full bg-orange-400 text-white">Register</button>
+            {user ? (
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 rounded-full border-2 border-white text-white"
+              >
+                Logout
+              </button>
+            ) : (
+              <>
+                <Link to="/login" className="px-4 py-2 rounded-full border-2 border-white text-white">
+                  Login
+                </Link>
+                <Link to="/register" className="px-4 py-2 rounded-full bg-orange-400 text-white">
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

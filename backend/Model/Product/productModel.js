@@ -25,36 +25,38 @@ const Product = sequelize.define(
       allowNull: false,
     },
 
-    stock_quantity: {
+    unit: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "per kg",
+    },
+
+    stock: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
     },
 
-    warranty_months: {
-      type: DataTypes.INTEGER,
+    category: {
+      type: DataTypes.STRING,
       allowNull: true,
+      defaultValue: "vegetables",
     },
 
-    category_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
+    emoji: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: "🌱",
     },
 
-    brand_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-
-    image_url: {
+    image: {
       type: DataTypes.STRING,
       allowNull: true,
     },
 
-    status: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: "active", // active | inactive
+    is_available: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
   },
   {
@@ -63,4 +65,4 @@ const Product = sequelize.define(
   }
 );
 
-export { Product };
+export default Product;
