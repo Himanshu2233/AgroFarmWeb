@@ -20,7 +20,7 @@ const Booking = sequelize.define('Booking', {
     allowNull: false
   },
   schedule_type: {
-    type: DataTypes.STRING,  // daily, weekly, monthly
+    type: DataTypes.STRING,  // daily, weekly, monthly, once
     allowNull: false
   },
   start_date: {
@@ -31,9 +31,18 @@ const Booking = sequelize.define('Booking', {
     type: DataTypes.DATEONLY,
     allowNull: true
   },
+  delivery_time: {
+    type: DataTypes.STRING,  // morning, afternoon, evening
+    allowNull: true,
+    defaultValue: 'morning'
+  },
+  notes: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
   status: {
     type: DataTypes.STRING,
-    defaultValue: 'pending'  // pending, approved, completed, cancelled
+    defaultValue: 'pending'  // pending, approved, active, completed, cancelled
   },
   total_price: {
     type: DataTypes.DECIMAL(10, 2),

@@ -49,6 +49,13 @@ const getAllBookings = async (req, res) => {
 // Create booking
 const createBooking = async (req, res) => {
   try {
+    // Admins cannot create bookings - they manage the platform
+    if (req.user.role === 'admin') {
+      return res.status(403).json({ 
+        message: 'Admins cannot create bookings. Please use a customer account.' 
+      });
+    }
+
     const { product_id, quantity, schedule_type, start_date, end_date, delivery_time, notes } = req.body;
 
     // Validate required fields
