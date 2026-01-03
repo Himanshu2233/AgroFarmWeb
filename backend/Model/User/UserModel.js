@@ -30,8 +30,11 @@ const User = sequelize.define(
       allowNull: true,
     },
     role: {
-      type: DataTypes.ENUM("customer", "admin"),
+      type: DataTypes.STRING,
       defaultValue: "customer",
+      validate: {
+        isIn: [["customer", "admin"]]
+      }
     },
     // Email verification fields
     is_verified: {
