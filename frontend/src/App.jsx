@@ -1,58 +1,103 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
 import Navbar from './components/navbar';
-import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute.jsx';
+import Footer from './components/Footer';
+import LoadingSpinner from './components/ui/LoadingSpinner';
+import { 
+  ProtectedRoute, 
+  AdminRoute, 
+  GuestOnlyRoute,
+  CustomerOnlyRoute 
+} from './components/ProtectedRoute.jsx';
 
-// Public Pages
-import Home from './pages/Home';
-import Products from './pages/Products';
-import ProductDetail from './pages/ProductDetail';
-import Animals from './pages/Animals';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import VerifyEmail from './pages/VerifyEmail';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
+// ========================================
+// LAZY LOADED PAGES - Code splitting for better performance
+// ========================================
 
-// Protected Pages
-import Bookings from './pages/Bookings';
-import Profile from './pages/Profile';
+// PUBLIC PAGES - Anyone can access
+const Home = lazy(() => import('./pages/Home'));
+const Products = lazy(() => import('./pages/Products'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const Animals = lazy(() => import('./pages/Animals'));
 
-// Admin Pages
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminProducts from './pages/admin/AdminProducts';
-import AdminAnimals from './pages/admin/AdminAnimals';
-import AdminBookings from './pages/admin/AdminBookings';
-import AdminUsers from './pages/admin/AdminUsers';
+// GUEST ONLY - Only non-logged-in users
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+
+// PROTECTED PAGES - Logged in users only
+const Bookings = lazy(() => import('./pages/Bookings'));
+const Profile = lazy(() => import('./pages/Profile'));
+
+// ADMIN PAGES - Admin role required
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminProducts = lazy(() => import('./pages/admin/AdminProducts'));
+const AdminAnimals = lazy(() => import('./pages/admin/AdminAnimals'));
+const AdminBookings = lazy(() => import('./pages/admin/AdminBookings'));
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
+
+// Page Loading Component with nice animation
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100">
+    <div className="text-center">
+      <LoadingSpinner size="large" />
+      <p className="mt-4 text-green-600 font-medium animate-pulse">Loading AgroFarm...</p>
+    </div>
+  </div>
+);
 
 function App() {
   return (
     <BrowserRouter>
-      <Navbar />
-      <Routes>
-        {/* Public Routes */}
+      <div className="flex flex-col min-h-screen">
+        <Navbar />
+        <main className="flex-grow">
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+        {/* ================================ */}
+        {/* PUBLIC ROUTES - No auth required */}
+        {/* ================================ */}
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/animals" element={<Animals />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        
+        {/* GUEST ONLY - Redirect if already logged in */}
+        <Route path="/login" element={
+          <GuestOnlyRoute>
+            <Login />
+          </GuestOnlyRoute>
+        } />
+        <Route path="/register" element={
+          <GuestOnlyRoute>
+            <Register />
+          </GuestOnlyRoute>
+        } />
         <Route path="/verify-email/:token" element={<VerifyEmail />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-        {/* Protected Routes */}
-        <Route path="/bookings" element={
-          <ProtectedRoute>
-            <Bookings />
-          </ProtectedRoute>
-        } />
+        {/* ================================ */}
+        {/* PROTECTED ROUTES - Login required */}
+        {/* ================================ */}
         <Route path="/profile" element={
           <ProtectedRoute>
             <Profile />
           </ProtectedRoute>
         } />
+        
+        {/* CUSTOMER ONLY - Admins redirected to admin panel */}
+        <Route path="/bookings" element={
+          <CustomerOnlyRoute>
+            <Bookings />
+          </CustomerOnlyRoute>
+        } />
 
-        {/* Admin Routes */}
+        {/* ================================ */}
+        {/* ADMIN ROUTES - Admin role required */}
+        {/* ================================ */}
         <Route path="/admin" element={
           <AdminRoute>
             <AdminDashboard />
@@ -78,7 +123,11 @@ function App() {
             <AdminUsers />
           </AdminRoute>
         } />
-      </Routes>
+            </Routes>
+          </Suspense>
+        </main>
+        <Footer />
+      </div>
     </BrowserRouter>
   );
 }
