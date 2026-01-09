@@ -8,7 +8,7 @@
  * - Scroll-to-top functionality
  */
 import { BrowserRouter } from 'react-router-dom';
-import Navbar from './components/navbar';
+import { Navbar } from './components';
 import { Footer, ScrollToTop } from './components/common';
 import { AppRoutes } from './routes/AppRoutes';
 import { useScrollToTop } from './hooks';

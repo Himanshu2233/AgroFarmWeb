@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getProductReviews, deleteReview } from '../api/reviewService.js';
-import { useAuth } from '../context/AuthContext.jsx';
-import StarRating from './StarRating.jsx';
+import { getProductReviews, deleteReview } from '../../../api/reviewService.js';
+import { useAuth } from '../../../context';
+import { StarRating } from '../../../components/ui';
 
 export default function ReviewsList({ productId, refreshKey }) {
   const [reviews, setReviews] = useState([]);
@@ -36,7 +36,7 @@ export default function ReviewsList({ productId, refreshKey }) {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
+    return new Date(dateString).toLocaleDateString('en-NP', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
