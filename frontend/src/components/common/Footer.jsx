@@ -174,15 +174,6 @@ export default function Footer() {
                   <span className="group-hover:translate-x-1 transition-transform">About Us</span>
                 </Link>
               </li>
-              <li>
-                <Link
-                  to={ROUTE_PATHS.CONTACT}
-                  className="text-green-200 hover:text-white transition-all duration-200 flex items-center gap-2 group"
-                >
-                  <span className="text-lg group-hover:scale-110 transition-transform">💬</span>
-                  <span className="group-hover:translate-x-1 transition-transform">Contact</span>
-                </Link>
-              </li>
             </ul>
           </div>
 
