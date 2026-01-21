@@ -25,6 +25,6 @@ router.post('/reset-password/:token', resetPassword);
 // Protected routes
 router.get('/me', authMiddleware, getMe);
 router.put('/update-profile', authMiddleware, updateProfile);
-router.put('/change-password', authMiddleware, changePassword);
+router.post('/change-password', authMiddleware, changePassword);
 
 export default router;

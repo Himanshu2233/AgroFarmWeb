@@ -5,16 +5,33 @@ const authMiddleware = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'No token provided' });
+      return res.status(401).json({ 
+        message: 'No token provided',
+        code: 'NO_TOKEN'
+      });
     }
 
     const token = authHeader.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({ 
+        message: 'Invalid token format',
+        code: 'INVALID_FORMAT'
+      });
+    }
+
     const decoded = verifyToken(token);
 
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(401).json({ message: 'Invalid token' });
+    const message = error.message || 'Invalid token';
+    const code = error.message === 'Token has expired' ? 'TOKEN_EXPIRED' : 'INVALID_TOKEN';
+    
+    return res.status(401).json({ 
+      message,
+      code
+    });
   }
 };
 

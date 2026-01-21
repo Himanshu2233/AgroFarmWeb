@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import API from '../api/api.js';
 
@@ -7,21 +7,27 @@ export default function VerifyEmail() {
   const [status, setStatus] = useState('verifying'); // verifying, success, error
   const [message, setMessage] = useState('');
 
-  
+  const verifyEmail = useCallback(async () => {
+    // Don't run if no token
+    if (!token) {
+      setStatus('error');
+      setMessage('Invalid verification link - no token found');
+      return;
+    }
 
-  const verifyEmail = async () => {
     try {
       const response = await API.get(`/auth/verify-email/${token}`);
       setStatus('success');
       setMessage(response.data.message);
     } catch (error) {
       setStatus('error');
-      setMessage(error.response?.data?.message || 'Verification failed');
+      setMessage(error.response?.data?.message || 'Verification failed. The link may be expired or invalid.');
     }
-  };
+  }, [token]);
+
   useEffect(() => {
     verifyEmail();
-  }, [token]);
+  }, [verifyEmail]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">

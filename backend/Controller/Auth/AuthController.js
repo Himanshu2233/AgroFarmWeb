@@ -1,5 +1,4 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { User } from "../../Model/index.js";
 import { sendEmail } from "../../Config/email.js";
@@ -8,14 +7,19 @@ import {
   welcomeEmailTemplate,
   resetPasswordTemplate,
 } from "../../Utils/emailTemplates.js";
+import { generateToken } from "../../Routes/Security/jwt-util.js";
 
-// Generate random token
-const generateToken = () => crypto.randomBytes(32).toString("hex");
+// Generate random verification/reset token
+const generateVerificationToken = () => crypto.randomBytes(32).toString("hex");
 
 // Register with email verification
 const register = async (req, res) => {
   try {
-    const { name, email, password, phone } = req.body;
+    const { name, email, password, phone, address } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({ message: "Phone number is required" });
+    }
 
     // Check if user exists
     const existingUser = await User.findOne({ where: { email } });
@@ -27,7 +31,7 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Generate verification token
-    const verificationToken = generateToken();
+    const verificationToken = generateVerificationToken();
     const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
     // Create user
@@ -36,6 +40,7 @@ const register = async (req, res) => {
       email,
       password: hashedPassword,
       phone,
+      address: address || null,
       is_verified: false,
       verification_token: verificationToken,
       verification_expires: verificationExpires,
@@ -120,7 +125,7 @@ const resendVerification = async (req, res) => {
     }
 
     // Generate new token
-    const verificationToken = generateToken();
+    const verificationToken = generateVerificationToken();
     const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     await user.update({
@@ -175,12 +180,12 @@ const login = async (req, res) => {
       });
     }
 
-    // Generate JWT
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
-    );
+    // Generate JWT using jwt-util
+    const token = generateToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
 
     res.json({
       message: "Login successful!",
@@ -191,6 +196,9 @@ const login = async (req, res) => {
         email: user.email,
         role: user.role,
         phone: user.phone,
+        address: user.address,
+        is_verified: user.is_verified,
+        createdAt: user.createdAt,
       },
     });
   } catch (error) {
@@ -212,7 +220,7 @@ const forgotPassword = async (req, res) => {
     }
 
     // Generate reset token
-    const resetToken = generateToken();
+    const resetToken = generateVerificationToken();
     const resetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
     await user.update({
@@ -287,7 +295,7 @@ const getMe = async (req, res) => {
 // Update Profile
 const updateProfile = async (req, res) => {
   try {
-    const { name, email, phone } = req.body;
+    const { name, email, phone, address } = req.body;
     const userId = req.user.id;
 
     const user = await User.findByPk(userId);
@@ -304,7 +312,12 @@ const updateProfile = async (req, res) => {
     }
 
     // Update user
-    await user.update({ name, email, phone });
+    await user.update({ 
+      name, 
+      email, 
+      phone,
+      address: address !== undefined ? address : user.address,
+    });
 
     res.json({
       message: "Profile updated successfully",
@@ -314,6 +327,9 @@ const updateProfile = async (req, res) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        address: user.address,
+        is_verified: user.is_verified,
+        createdAt: user.createdAt,
       },
     });
   } catch (error) {

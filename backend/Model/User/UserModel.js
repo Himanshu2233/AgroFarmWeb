@@ -27,7 +27,7 @@ const User = sequelize.define(
     },
     phone: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
     },
     role: {
       type: DataTypes.STRING,
@@ -35,6 +35,11 @@ const User = sequelize.define(
       validate: {
         isIn: [["customer", "admin"]]
       }
+    },
+    // Delivery address (Kathmandu Valley)
+    address: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
     // Email verification fields
     is_verified: {

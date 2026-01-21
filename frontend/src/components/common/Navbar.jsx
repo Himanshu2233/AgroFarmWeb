@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useAuth } from '../../context';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -52,6 +52,7 @@ export default function Navbar() {
     { to: '/', label: 'Home', icon: '🏠' },
     { to: '/products', label: 'Products', icon: '🥬' },
     { to: '/animals', label: 'Animals', icon: '🐄' },
+    { to: '/about', label: 'About Us', icon: 'ℹ️' },
   ];
 
   return (

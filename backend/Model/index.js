@@ -13,6 +13,10 @@ Booking.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 Product.hasMany(Booking, { foreignKey: 'product_id', as: 'bookings' });
 Booking.belongsTo(Product, { foreignKey: 'product_id', as: 'product' });
 
+// Animal -> Booking (for animal enquiries)
+Animal.hasMany(Booking, { foreignKey: 'animal_id', as: 'enquiries' });
+Booking.belongsTo(Animal, { foreignKey: 'animal_id', as: 'animal' });
+
 // User -> Review
 User.hasMany(Review, { foreignKey: 'user_id', as: 'reviews' });
 Review.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
