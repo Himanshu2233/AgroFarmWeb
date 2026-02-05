@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
-import { connectDB } from '../Database/db.js';
-import { User, Product, Animal, syncDatabase } from '../Model/index.js';
+import { connectDB } from '../database/db.js';
+import { User, Product, Animal, syncDatabase } from '../models/index.js';
 
 const seedData = async () => {
   await connectDB();
@@ -14,7 +14,7 @@ const seedData = async () => {
       defaults: {
         name: 'Farm Admin',
         email: 'admin@agrofarm.com',
-        phone: '9876543210',
+        phone: '9812345678',
         password: hashedPassword,
         role: 'admin'
       }
