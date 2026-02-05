@@ -1,0 +1,487 @@
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import { User } from "../models/index.js";
+import { sendEmail } from "../config/email.config.js";
+import {
+  verificationEmailTemplate,
+  welcomeEmailTemplate,
+  resetPasswordTemplate,
+} from "../utils/emailTemplates.js";
+import { generateToken } from "../utils/jwt.util.js";
+import { validateRegistration, validateLogin, sanitizeString, isValidEmail, isValidPassword } from "../utils/validation.js";
+
+// Generate random verification/reset token
+const generateVerificationToken = () => crypto.randomBytes(32).toString("hex");
+
+// Register with email verification
+const register = async (req, res) => {
+  try {
+    const { name, email, password, phone, address } = req.body;
+
+    // Validate input
+    const validation = validateRegistration({ name, email, password, phone });
+    if (!validation.isValid) {
+      return res.status(400).json({ 
+        message: validation.errors[0],
+        errors: validation.errors 
+      });
+    }
+
+    // Sanitize inputs
+    const sanitizedName = sanitizeString(name);
+    const sanitizedAddress = address ? sanitizeString(address) : null;
+
+    // Check if user exists
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Generate verification token
+    const verificationToken = generateVerificationToken();
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // Create user
+    const user = await User.create({
+      name: sanitizedName,
+      email: email.toLowerCase().trim(),
+      password: hashedPassword,
+      phone: phone.trim(),
+      address: sanitizedAddress,
+      is_verified: false,
+      verification_token: verificationToken,
+      verification_expires: verificationExpires,
+    });
+
+    // Send verification email
+    const verificationLink = `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`;
+    await sendEmail({
+      to: email,
+      subject: "🌾 Verify your AgroFarm account",
+      html: verificationEmailTemplate(name, verificationLink),
+    });
+
+    res.status(201).json({
+      message:
+        "Registration successful! Please check your email to verify your account.",
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    console.error("Register error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Verify email
+const verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const user = await User.findOne({
+      where: { verification_token: token },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid verification link" });
+    }
+
+    if (user.verification_expires < new Date()) {
+      return res.status(400).json({ message: "Verification link has expired" });
+    }
+
+    // Update user as verified
+    await user.update({
+      is_verified: true,
+      verification_token: null,
+      verification_expires: null,
+    });
+
+    // Send welcome email
+    await sendEmail({
+      to: user.email,
+      subject: "🎉 Welcome to AgroFarm!",
+      html: welcomeEmailTemplate(user.name),
+    });
+
+    res.json({
+      message: "Email verified successfully! You can now login.",
+    });
+  } catch (error) {
+    console.error("Verify email error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Resend verification email
+const resendVerification = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.is_verified) {
+      return res.status(400).json({ message: "Email already verified" });
+    }
+
+    // Generate new token
+    const verificationToken = generateVerificationToken();
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await user.update({
+      verification_token: verificationToken,
+      verification_expires: verificationExpires,
+    });
+
+    // Send email
+    const verificationLink = `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`;
+    await sendEmail({
+      to: email,
+      subject: "🌾 Verify your AgroFarm account",
+      html: verificationEmailTemplate(user.name, verificationLink),
+    });
+
+    res.json({ message: "Verification email sent!" });
+  } catch (error) {
+    console.error("Resend verification error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Login (check verification)
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate input
+    const validation = validateLogin({ email, password });
+    if (!validation.isValid) {
+      return res.status(400).json({ 
+        message: validation.errors[0],
+        errors: validation.errors 
+      });
+    }
+
+    const user = await User.findOne({ where: { email: email.toLowerCase().trim() } });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // Check if account is active
+    if (!user.is_active) {
+      return res
+        .status(403)
+        .json({ message: "Account is deactivated. Contact admin." });
+    }
+
+    // Check password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // Check if email is verified
+    if (!user.is_verified) {
+      return res.status(403).json({
+        message: "Please verify your email first",
+        needsVerification: true,
+        email: user.email,
+      });
+    }
+
+    // Generate JWT using jwt-util
+    const token = generateToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    res.json({
+      message: "Login successful!",
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        address: user.address,
+        is_verified: user.is_verified,
+        createdAt: user.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Forgot Password - Send reset email
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      // Don't reveal if email exists for security
+      return res.json({ message: "If this email exists, a reset link will be sent." });
+    }
+
+    // Generate reset token
+    const resetToken = generateVerificationToken();
+    const resetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await user.update({
+      reset_token: resetToken,
+      reset_expires: resetExpires,
+    });
+
+    // Send reset email
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    await sendEmail({
+      to: email,
+      subject: "🔐 Reset your AgroFarm password",
+      html: resetPasswordTemplate(user.name, resetLink),
+    });
+
+    res.json({ message: "If this email exists, a reset link will be sent." });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Reset Password - Verify token and update password
+const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    const user = await User.findOne({ where: { reset_token: token } });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired reset link" });
+    }
+
+    if (user.reset_expires < new Date()) {
+      return res.status(400).json({ message: "Reset link has expired" });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await user.update({
+      password: hashedPassword,
+      reset_token: null,
+      reset_expires: null,
+    });
+
+    res.json({ message: "Password reset successful! You can now login." });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get current user
+const getMe = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id, {
+      attributes: { exclude: ["password", "verification_token", "reset_token"] },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Update Profile
+const updateProfile = async (req, res) => {
+  try {
+    const { name, email, phone, address } = req.body;
+    const userId = req.user.id;
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if email is being changed and if it's already taken
+    if (email !== user.email) {
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) {
+        return res.status(400).json({ message: "Email already in use" });
+      }
+    }
+
+    // Update user
+    await user.update({ 
+      name, 
+      email, 
+      phone,
+      address: address !== undefined ? address : user.address,
+    });
+
+    res.json({
+      message: "Profile updated successfully",
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        address: user.address,
+        is_verified: user.is_verified,
+        createdAt: user.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Change Password
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password
+    await user.update({ password: hashedPassword });
+
+    res.json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Change password error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Upload Profile Image
+const uploadProfileImage = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No image file provided" });
+    }
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Delete old profile image if exists
+    if (user.profile_image) {
+      const oldImagePath = user.profile_image.replace(/^\//, '');
+      const fs = await import('fs');
+      if (fs.existsSync(oldImagePath)) {
+        fs.unlinkSync(oldImagePath);
+      }
+    }
+
+    // Update user with new image path
+    const imagePath = `/uploads/${req.file.filename}`;
+    await user.update({ profile_image: imagePath });
+
+    // Generate new token with updated user data
+    const token = generateToken({
+      id: user.id,
+      email: user.email,
+      role: user.role
+    });
+
+    res.json({
+      message: "Profile image uploaded successfully",
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        role: user.role,
+        profile_image: imagePath,
+        is_active: user.is_active,
+        is_verified: user.is_verified,
+        createdAt: user.createdAt,
+      },
+      token,
+    });
+  } catch (error) {
+    console.error("Upload profile image error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Delete Account
+const deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Delete profile image if exists
+    if (user.profile_image) {
+      const imagePath = user.profile_image.replace(/^\//, '');
+      const fs = await import('fs');
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+
+    // Delete user
+    await user.destroy();
+
+    res.json({ message: "Account deleted successfully" });
+  } catch (error) {
+    console.error("Delete account error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export {
+  register,
+  login,
+  getMe,
+  verifyEmail,
+  resendVerification,
+  forgotPassword,
+  resetPassword,
+  updateProfile,
+  changePassword,
+  uploadProfileImage,
+  deleteAccount,
+};
