@@ -1,4 +1,5 @@
 import API from './api.js';
+import { createFormData, FORMDATA_HEADERS } from './helpers';
 
 // Get all animals
 export const getAllAnimals = async () => {
@@ -14,37 +15,15 @@ export const getAnimalById = async (id) => {
 
 // Create animal with image
 export const createAnimal = async (animalData) => {
-  const formData = new FormData();
-  
-  Object.keys(animalData).forEach(key => {
-    if (animalData[key] !== null && animalData[key] !== undefined) {
-      formData.append(key, animalData[key]);
-    }
-  });
-
-  const response = await API.post('/animals', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  });
+  const formData = createFormData(animalData);
+  const response = await API.post('/animals', formData, FORMDATA_HEADERS);
   return response.data;
 };
 
 // Update animal with image
 export const updateAnimal = async (id, animalData) => {
-  const formData = new FormData();
-  
-  Object.keys(animalData).forEach(key => {
-    if (animalData[key] !== null && animalData[key] !== undefined) {
-      formData.append(key, animalData[key]);
-    }
-  });
-
-  const response = await API.put(`/animals/${id}`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  });
+  const formData = createFormData(animalData);
+  const response = await API.put(`/animals/${id}`, formData, FORMDATA_HEADERS);
   return response.data;
 };
 

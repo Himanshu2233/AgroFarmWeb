@@ -1,4 +1,5 @@
 import API from './api.js';
+import { createFormData, FORMDATA_HEADERS } from './helpers';
 
 // Get all products
 export const getAllProducts = async () => {
@@ -14,38 +15,15 @@ export const getProductById = async (id) => {
 
 // Create product with image
 export const createProduct = async (productData) => {
-  const formData = new FormData();
-  
-  // Append all fields
-  Object.keys(productData).forEach(key => {
-    if (productData[key] !== null && productData[key] !== undefined) {
-      formData.append(key, productData[key]);
-    }
-  });
-
-  const response = await API.post('/products', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  });
+  const formData = createFormData(productData);
+  const response = await API.post('/products', formData, FORMDATA_HEADERS);
   return response.data;
 };
 
 // Update product with image
 export const updateProduct = async (id, productData) => {
-  const formData = new FormData();
-  
-  Object.keys(productData).forEach(key => {
-    if (productData[key] !== null && productData[key] !== undefined) {
-      formData.append(key, productData[key]);
-    }
-  });
-
-  const response = await API.put(`/products/${id}`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  });
+  const formData = createFormData(productData);
+  const response = await API.put(`/products/${id}`, formData, FORMDATA_HEADERS);
   return response.data;
 };
 
