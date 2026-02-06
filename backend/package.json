@@ -2,11 +2,12 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "nodemon index.js",
-    "dev": "nodemon index.js",
-    "seed": "node seeders/seed.js"
+    "start": "nodemon server.js",
+    "dev": "nodemon server.js",
+    "seed": "node src/seeders/seed.js",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +26,9 @@
     "sequelize": "^6.37.7"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "jest": "^30.2.0",
+    "nodemon": "^3.1.11",
+    "sequelize-mock": "^0.10.2",
+    "supertest": "^7.2.2"
   }
 }
