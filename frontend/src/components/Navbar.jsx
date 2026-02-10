@@ -42,6 +42,10 @@ export default function Navbar() {
     navigate('/');
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // Check if current path matches
   const isActive = (path) => {
     if (path === '/') return location.pathname === '/';
@@ -66,7 +70,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2 group">
             <span className="text-3xl transform group-hover:rotate-12 transition-transform duration-300">🌾</span>
             <h1 className={`text-xl sm:text-2xl font-bold font-display transition-colors ${
               isScrolled ? 'text-green-800' : 'text-white'
@@ -76,7 +80,7 @@ export default function Navbar() {
           </Link>
 
           {/* Navigation Links - Desktop */}
-          <ul className="hidden md:flex gap-1 list-none m-0 p-0">
+          <ul className="hidden lg:flex gap-1 list-none m-0 p-0">
             {navLinks.map((link) => (
               <li key={link.to}>
                 <Link 
@@ -104,7 +108,7 @@ export default function Navbar() {
           </ul>
 
           {/* Auth Buttons - Desktop */}
-          <div className="hidden md:flex gap-3 items-center">
+          <div className="hidden lg:flex gap-3 items-center">
             {user ? (
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -246,6 +250,7 @@ export default function Navbar() {
               <div className="flex items-center gap-2">
                 <Link
                   to="/login"
+                  onClick={scrollToTop}
                   className={`px-5 py-2 rounded-xl font-medium transition-all duration-200 ${
                     isScrolled
                       ? 'text-green-700 hover:bg-green-50'
@@ -256,6 +261,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/register"
+                  onClick={scrollToTop}
                   className="px-5 py-2 rounded-xl bg-gradient-to-r from-orange-400 to-amber-500 text-white font-medium hover:from-orange-500 hover:to-amber-600 shadow-lg shadow-orange-500/25 hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95"
                 >
                   Register
@@ -266,7 +272,7 @@ export default function Navbar() {
 
           {/* Mobile Menu Button */}
           <button
-            className={`md:hidden p-2 rounded-lg transition-colors ${
+            className={`lg:hidden p-2 rounded-lg transition-colors ${
               isScrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
             }`}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -286,7 +292,7 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Menu */}
-      <div className={`md:hidden transition-all duration-300 overflow-hidden ${
+      <div className={`lg:hidden transition-all duration-300 overflow-hidden ${
         isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
       }`}>
         <div className={`px-4 pb-6 pt-2 space-y-1 ${
@@ -384,6 +390,7 @@ export default function Navbar() {
               <>
                 <Link 
                   to="/login" 
+                  onClick={scrollToTop}
                   className={`flex-1 text-center px-4 py-3 rounded-xl font-medium border-2 transition-colors ${
                     isScrolled 
                       ? 'border-green-600 text-green-700 hover:bg-green-50' 
@@ -394,6 +401,7 @@ export default function Navbar() {
                 </Link>
                 <Link 
                   to="/register" 
+                  onClick={scrollToTop}
                   className="flex-1 text-center px-4 py-3 rounded-xl bg-gradient-to-r from-orange-400 to-amber-500 text-white font-medium hover:from-orange-500 hover:to-amber-600"
                 >
                   Register

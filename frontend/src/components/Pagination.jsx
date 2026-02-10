@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 
 /**
  * Pagination Component - Reusable pagination with smart page range
@@ -66,25 +66,25 @@ export default function Pagination({
     <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${className}`}>
       {/* Items info and per page selector */}
       <div className="flex items-center gap-4">
-        <span className="text-sm text-gray-600">
-          Showing <span className="font-semibold text-gray-800">{startItem}-{endItem}</span> of{' '}
-          <span className="font-semibold text-gray-800">{totalItems}</span> items
+        <span className="text-sm text-gray-500">
+          Showing <span className="font-medium text-gray-700">{startItem}-{endItem}</span> of{' '}
+          <span className="font-medium text-gray-700">{totalItems}</span>
         </span>
         
         {showItemsPerPage && (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">Per page:</span>
+            <span className="text-sm text-gray-400">|</span>
             <select
               value={itemsPerPage}
               onChange={(e) => {
                 onItemsPerPageChange(Number(e.target.value));
                 onPageChange(1); // Reset to first page
               }}
-              className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white cursor-pointer"
+              className="px-2.5 py-1 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white cursor-pointer text-gray-600"
             >
               {itemsPerPageOptions.map((option) => (
                 <option key={option} value={option}>
-                  {option}
+                  {option} / page
                 </option>
               ))}
             </select>
@@ -94,17 +94,18 @@ export default function Pagination({
 
       {/* Page navigation */}
       {totalPages > 1 && (
-        <nav className="flex items-center gap-1">
+        <nav className="flex items-center gap-1.5">
           {/* Previous button */}
           <button
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors"
+            className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-green-50 hover:text-green-700 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-600 transition-colors"
             title="Previous page"
           >
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
+            <span className="hidden sm:inline">Prev</span>
           </button>
 
           {/* Page numbers */}
@@ -113,18 +114,18 @@ export default function Pagination({
               page === '...' ? (
                 <span
                   key={`ellipsis-${index}`}
-                  className="w-10 h-10 flex items-center justify-center text-gray-400"
+                  className="w-9 h-9 flex items-center justify-center text-gray-400 text-sm"
                 >
-                  ⋯
+                  ...
                 </span>
               ) : (
                 <button
                   key={page}
                   onClick={() => onPageChange(page)}
-                  className={`w-10 h-10 rounded-lg font-medium transition-all ${
+                  className={`min-w-[36px] h-9 px-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     currentPage === page
-                      ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg shadow-green-500/25'
-                      : 'border border-gray-200 hover:bg-gray-50 text-gray-700'
+                      ? 'bg-green-600 text-white shadow-sm shadow-green-500/30'
+                      : 'text-gray-600 hover:bg-green-50 hover:text-green-700'
                   }`}
                 >
                   {page}
@@ -137,10 +138,11 @@ export default function Pagination({
           <button
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors"
+            className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-green-50 hover:text-green-700 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-600 transition-colors"
             title="Next page"
           >
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span className="hidden sm:inline">Next</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
@@ -183,36 +185,4 @@ export function PaginationCompact({ currentPage, totalPages, onPageChange }) {
   );
 }
 
-// Hook for pagination state management
-export function usePagination(totalItems, initialPage = 1, initialItemsPerPage = 10) {
-  const [currentPage, setCurrentPage] = useState(initialPage);
-  const [itemsPerPage, setItemsPerPage] = useState(initialItemsPerPage);
 
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-
-  const goToPage = (page) => {
-    const validPage = Math.max(1, Math.min(page, totalPages));
-    setCurrentPage(validPage);
-  };
-
-  const nextPage = () => goToPage(currentPage + 1);
-  const prevPage = () => goToPage(currentPage - 1);
-  const firstPage = () => goToPage(1);
-  const lastPage = () => goToPage(totalPages);
-
-  return {
-    currentPage,
-    itemsPerPage,
-    totalPages,
-    startIndex,
-    endIndex,
-    setCurrentPage: goToPage,
-    setItemsPerPage,
-    nextPage,
-    prevPage,
-    firstPage,
-    lastPage,
-  };
-}
