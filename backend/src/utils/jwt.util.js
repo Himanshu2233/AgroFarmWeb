@@ -3,12 +3,12 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const generateToken = (payload) => {
+const generateToken = (payload, expiresIn) => {
   try {
     return jwt.sign(
       payload,
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
+      { expiresIn: expiresIn || process.env.JWT_EXPIRES_IN || '1d' }
     );
   } catch (error) {
     console.error('Token generation error:', error);

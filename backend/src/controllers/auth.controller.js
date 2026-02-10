@@ -161,7 +161,7 @@ const resendVerification = async (req, res) => {
 // Login (check verification)
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, rememberMe } = req.body;
 
     // Validate input
     const validation = validateLogin({ email, password });
@@ -200,11 +200,12 @@ const login = async (req, res) => {
     }
 
     // Generate JWT using jwt-util
+    const tokenExpiry = rememberMe ? '7d' : undefined;
     const token = generateToken({
       id: user.id,
       email: user.email,
       role: user.role,
-    });
+    }, tokenExpiry);
 
     res.json({
       message: "Login successful!",

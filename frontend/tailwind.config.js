@@ -4,6 +4,14 @@ export default {
     "./src/**/*.{js,jsx}",
   ],
   theme: {
+    // Explicit responsive breakpoints (standard convention)
+    screens: {
+      'sm': '640px',   // Mobile landscape
+      'md': '768px',   // Tablet
+      'lg': '1024px',  // Desktop
+      'xl': '1280px',  // Large desktop
+      '2xl': '1536px', // Extra large
+    },
     extend: {
       // Custom Colors for AgroFarm brand
       colors: {
