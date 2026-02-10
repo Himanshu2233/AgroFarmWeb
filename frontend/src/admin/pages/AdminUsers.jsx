@@ -8,11 +8,13 @@ import {
   changeUserRole 
 } from '../../api/userService.js';
 import { useToast } from '../../contexts';
-import { Pagination, Button, BackButton } from '../../components';
-import { useScrollToTop } from '../../utils';
+import { Pagination, Button, BackButton, useConfirm } from '../../components';
+import { useScrollToTop, useDocumentTitle } from '../../utils';
 
 export default function AdminUsers() {
   useScrollToTop();
+  useDocumentTitle('Admin - Users');
+  const confirm = useConfirm();
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -58,7 +60,13 @@ export default function AdminUsers() {
     const newRole = currentRole === 'admin' ? 'customer' : 'admin';
     const confirmMsg = `Change this user to ${newRole}?`;
     
-    if (!confirm(confirmMsg)) return;
+    const confirmed = await confirm({
+      title: 'Change User Role?',
+      message: confirmMsg,
+      confirmText: 'Change Role',
+      variant: 'warning',
+    });
+    if (!confirmed) return;
 
     try {
       await changeUserRole(id, newRole);
@@ -70,7 +78,13 @@ export default function AdminUsers() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+    const confirmed = await confirm({
+      title: 'Delete User?',
+      message: 'Are you sure you want to delete this user? This action cannot be undone.',
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
 
     try {
       await deleteUser(id);

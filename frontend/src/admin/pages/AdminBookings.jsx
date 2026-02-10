@@ -1,17 +1,19 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getAllBookings, updateBookingStatus } from '../../api/bookingService.js';
 import { useToast } from '../../contexts';
-import { Pagination, Modal, BackButton, OrderDetailsModal } from '../../components';
-import { useScrollToTop } from '../../utils';
+import { Pagination, Modal, BackButton, OrderDetailsModal, useConfirm } from '../../components';
+import { useScrollToTop, useDocumentTitle } from '../../utils';
 
 export default function AdminBookings() {
   useScrollToTop();
+  useDocumentTitle('Admin - Bookings');
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [selectedBooking, setSelectedBooking] = useState(null);
   const toast = useToast();
+  const confirm = useConfirm();
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -366,9 +368,15 @@ export default function AdminBookings() {
                       <select
                         value={booking.status}
                         onClick={(e) => e.stopPropagation()}
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           if (e.target.value !== booking.status) {
-                            if (confirm(`Change status to "${e.target.value}"?`)) {
+                            const confirmed = await confirm({
+                              title: 'Change Status?',
+                              message: `Change status to "${e.target.value}"?`,
+                              confirmText: 'Change',
+                              variant: 'warning',
+                            });
+                            if (confirmed) {
                               handleStatusUpdate(booking.id, e.target.value);
                             } else {
                               e.target.value = booking.status;

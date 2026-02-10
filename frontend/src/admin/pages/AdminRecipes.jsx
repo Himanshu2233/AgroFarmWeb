@@ -3,13 +3,14 @@ import { getAllRecipes, deleteRecipe } from '../../api';
 import { useToast } from '../../contexts';
 import { useDocumentTitle } from '../../utils/useDocumentTitle';
 import { useScrollToTop } from '../../utils/useScrollToTop';
-import { Button, BackButton } from '../../components';
+import { Button, BackButton, useConfirm } from '../../components';
 
 export default function AdminRecipes() {
   useDocumentTitle('Admin - Recipes');
   useScrollToTop();
   
   const toast = useToast();
+  const confirm = useConfirm();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +32,13 @@ export default function AdminRecipes() {
   };
 
   const handleDelete = async (id, title) => {
-    if (!window.confirm(`Are you sure you want to delete "${title}"?`)) return;
+    const confirmed = await confirm({
+      title: 'Delete Recipe?',
+      message: `Are you sure you want to delete "${title}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
 
     try {
       await deleteRecipe(id);

@@ -4,10 +4,13 @@ import { getAllProducts } from '../../api/productService.js';
 import { getAllAnimals } from '../../api/animalService.js';
 import { getAllBookings } from '../../api/bookingService.js';
 import { getAllUsers } from '../../api/userService.js';
-import { useScrollToTop } from '../../utils';
+import { useScrollToTop, useDocumentTitle } from '../../utils';
+import { useToast } from '../../contexts';
 
 export default function AdminDashboard() {
   useScrollToTop();
+  useDocumentTitle('Admin Dashboard');
+  const toast = useToast();
   const [stats, setStats] = useState({
     products: 0,
     animals: 0,
@@ -80,7 +83,7 @@ export default function AdminDashboard() {
       });
     } catch (error) {
       console.error('Failed to fetch stats:', error);
-      alert('Failed to load dashboard data. Please check console for details.');
+      toast.error('Failed to load dashboard data. Please try again.');
     } finally {
       setLoading(false);
     }

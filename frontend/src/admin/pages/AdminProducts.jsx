@@ -1,13 +1,15 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { getAllProducts, createProduct, updateProduct, deleteProduct } from '../../api/productService.js';
 import { useToast } from '../../contexts';
-import { Pagination, Button, BackButton } from '../../components';
-import { useScrollToTop } from '../../utils';
+import { Pagination, Button, BackButton, useConfirm } from '../../components';
+import { useScrollToTop, useDocumentTitle } from '../../utils';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function AdminProducts() {
   useScrollToTop();
+  useDocumentTitle('Admin - Products');
+  const confirm = useConfirm();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -127,7 +129,13 @@ export default function AdminProducts() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
+    const confirmed = await confirm({
+      title: 'Delete Product?',
+      message: 'Are you sure you want to delete this product? This action cannot be undone.',
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
     try {
       await deleteProduct(id);
       fetchProducts();
