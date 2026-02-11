@@ -7,36 +7,39 @@ import Review from './review.model.js';
 import Recipe from './recipe.model.js';
 
 // User -> Booking
-User.hasMany(Booking, { foreignKey: 'user_id', as: 'bookings' });
+User.hasMany(Booking, { foreignKey: 'user_id', as: 'bookings', onDelete: 'CASCADE' });
 Booking.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
 // Product -> Booking
-Product.hasMany(Booking, { foreignKey: 'product_id', as: 'bookings' });
+Product.hasMany(Booking, { foreignKey: 'product_id', as: 'bookings', onDelete: 'SET NULL' });
 Booking.belongsTo(Product, { foreignKey: 'product_id', as: 'product' });
 
 // Animal -> Booking (for animal enquiries)
-Animal.hasMany(Booking, { foreignKey: 'animal_id', as: 'enquiries' });
+Animal.hasMany(Booking, { foreignKey: 'animal_id', as: 'enquiries', onDelete: 'SET NULL' });
 Booking.belongsTo(Animal, { foreignKey: 'animal_id', as: 'animal' });
 
 // User -> Review
-User.hasMany(Review, { foreignKey: 'user_id', as: 'reviews' });
+User.hasMany(Review, { foreignKey: 'user_id', as: 'reviews', onDelete: 'CASCADE' });
 Review.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
 // Product -> Review
-Product.hasMany(Review, { foreignKey: 'product_id', as: 'reviews' });
+Product.hasMany(Review, { foreignKey: 'product_id', as: 'reviews', onDelete: 'CASCADE' });
 Review.belongsTo(Product, { foreignKey: 'product_id', as: 'product' });
 
 // User -> Recipe
-User.hasMany(Recipe, { foreignKey: 'user_id', as: 'recipes' });
+User.hasMany(Recipe, { foreignKey: 'user_id', as: 'recipes', onDelete: 'CASCADE' });
 Recipe.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
 // Sync database
 const syncDatabase = async () => {
   try {
-    await sequelize.sync({ alter: true });
-    console.log('✅ All tables synced!');
+    if (process.env.NODE_ENV !== 'production') {
+      await sequelize.sync({ alter: true });
+      console.log('✅ All tables synced!');
+    }
   } catch (error) {
     console.error('❌ Sync error:', error.message);
+    throw error;
   }
 };
 

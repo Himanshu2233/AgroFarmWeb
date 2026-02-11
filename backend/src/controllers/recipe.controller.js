@@ -1,4 +1,5 @@
 import { Recipe, User } from '../models/index.js';
+import { Op } from 'sequelize';
 import path from 'path';
 import fs from 'fs';
 
@@ -11,6 +12,12 @@ const getAllRecipes = async (req, res) => {
     
     if (category) whereClause.category = category;
     if (difficulty) whereClause.difficulty = difficulty;
+    if (search) {
+      whereClause[Op.or] = [
+        { title: { [Op.iLike]: `%${search}%` } },
+        { description: { [Op.iLike]: `%${search}%` } }
+      ];
+    }
     
     const recipes = await Recipe.findAll({
       where: whereClause,
@@ -24,17 +31,7 @@ const getAllRecipes = async (req, res) => {
       order: [['createdAt', 'DESC']]
     });
     
-    // Filter by search if provided
-    let filteredRecipes = recipes;
-    if (search) {
-      const searchLower = search.toLowerCase();
-      filteredRecipes = recipes.filter(recipe => 
-        recipe.title.toLowerCase().includes(searchLower) ||
-        recipe.description.toLowerCase().includes(searchLower)
-      );
-    }
-    
-    res.json(filteredRecipes);
+    res.json(recipes);
   } catch (error) {
     console.error('Get recipes error:', error);
     res.status(500).json({ message: 'Server error' });

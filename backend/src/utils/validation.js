@@ -144,8 +144,8 @@ export const validateProduct = (data) => {
 export const validateBooking = (data) => {
   const errors = [];
   
-  if (!data.product_type || !['product', 'animal'].includes(data.product_type)) {
-    errors.push('Product type must be "product" or "animal"');
+  if (!data.booking_type || !['product', 'animal'].includes(data.booking_type)) {
+    errors.push('Booking type must be "product" or "animal"');
   }
   
   if (!isValidNumber(data.product_id, 1)) {

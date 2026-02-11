@@ -8,7 +8,8 @@ const seedData = async () => {
 
   try {
     // Create Admin
-    const hashedPassword = await bcrypt.hash('admin123', 10);
+    const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@12345';
+    const hashedPassword = await bcrypt.hash(adminPassword, 10);
     await User.findOrCreate({
       where: { email: 'admin@agrofarm.com' },
       defaults: {
@@ -16,10 +17,11 @@ const seedData = async () => {
         email: 'admin@agrofarm.com',
         phone: '9812345678',
         password: hashedPassword,
-        role: 'admin'
+        role: 'admin',
+        is_verified: true
       }
     });
-    console.log('✅ Admin created (admin@agrofarm.com / admin123)');
+    console.log('✅ Admin created (admin@agrofarm.com)');
 
     // Create Products
     const products = [

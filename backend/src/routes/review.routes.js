@@ -5,7 +5,8 @@ import {
   createReview,
   updateReview,
   deleteReview,
-  getProductRating
+  getProductRating,
+  replyToReview
 } from '../controllers/review.controller.js';
 import { authMiddleware, adminMiddleware } from '../middlewares/token.middleware.js';
 
@@ -22,5 +23,6 @@ router.delete('/:id', authMiddleware, deleteReview);
 
 // Admin routes
 router.get('/all', authMiddleware, adminMiddleware, getAllReviews);
+router.put('/:id/reply', authMiddleware, adminMiddleware, replyToReview);
 
 export default router;

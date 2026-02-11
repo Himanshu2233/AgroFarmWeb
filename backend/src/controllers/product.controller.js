@@ -40,9 +40,9 @@ const createProduct = async (req, res) => {
     const product = await Product.create({
       name,
       description,
-      price: parseFloat(price),
+      price: price !== undefined ? parseFloat(price) : 0,
       unit,
-      stock: parseInt(stock),
+      stock: stock !== undefined ? parseInt(stock, 10) : 0,
       category,
       emoji,
       image,
@@ -94,9 +94,9 @@ const updateProduct = async (req, res) => {
     await product.update({
       name,
       description,
-      price: parseFloat(price),
+      price: price !== undefined ? parseFloat(price) : product.price,
       unit,
-      stock: parseInt(stock),
+      stock: stock !== undefined ? parseInt(stock, 10) : product.stock,
       category,
       emoji,
       image,

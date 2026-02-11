@@ -14,12 +14,13 @@ const router = express.Router();
 
 // Public routes
 router.get('/', getAllRecipes);
-router.get('/:id', getRecipe);
 
-// Protected routes
+// Protected routes (must be before /:id to avoid matching)
+router.get('/user/my-recipes', authMiddleware, getUserRecipes);
+
+router.get('/:id', getRecipe);
 router.post('/', authMiddleware, upload.single('image'), createRecipe);
 router.put('/:id', authMiddleware, upload.single('image'), updateRecipe);
 router.delete('/:id', authMiddleware, deleteRecipe);
-router.get('/user/my-recipes', authMiddleware, getUserRecipes);
 
 export default router;

@@ -63,6 +63,11 @@ const User = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    // Profile image
+    profile_image: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     // Account status
     is_active: {
       type: DataTypes.BOOLEAN,
