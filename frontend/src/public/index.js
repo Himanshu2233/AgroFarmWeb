@@ -9,6 +9,9 @@ export { default as Register } from './pages/Register';
 export { default as ForgotPassword } from './pages/ForgotPassword';
 export { default as ResetPassword } from './pages/ResetPassword';
 export { default as VerifyEmail } from './pages/VerifyEmail';
+export { default as Recipes } from './pages/Recipes';
+export { default as RecipeDetail } from './pages/RecipeDetail';
+export { default as HarvestCalendar } from './pages/HarvestCalendar';
 
 // Public Schemas
 export * from './schemas/auth.schema';

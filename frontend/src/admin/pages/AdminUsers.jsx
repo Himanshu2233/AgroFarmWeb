@@ -11,6 +11,8 @@ import { useToast } from '../../contexts';
 import { Pagination, Button, BackButton, useConfirm } from '../../components';
 import { useScrollToTop, useDocumentTitle } from '../../utils';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function AdminUsers() {
   useScrollToTop();
   useDocumentTitle('Admin - Users');
@@ -298,13 +300,21 @@ export default function AdminUsers() {
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
                   {/* User Avatar & Info */}
                   <div className="flex items-center gap-4 flex-1">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold text-white shadow-lg ${
-                      user.role === 'admin' 
-                        ? 'bg-gradient-to-br from-purple-500 to-purple-700' 
-                        : 'bg-gradient-to-br from-green-500 to-emerald-600'
-                    }`}>
-                      {user.name.charAt(0).toUpperCase()}
-                    </div>
+                    {user.profile_image ? (
+                      <img 
+                        src={`${API_URL}${user.profile_image}`} 
+                        alt={user.name} 
+                        className={`w-14 h-14 rounded-2xl object-cover shadow-lg`}
+                      />
+                    ) : (
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold text-white shadow-lg ${
+                        user.role === 'admin' 
+                          ? 'bg-gradient-to-br from-purple-500 to-purple-700' 
+                          : 'bg-gradient-to-br from-green-500 to-emerald-600'
+                      }`}>
+                        {user.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-semibold text-gray-800 text-lg">{user.name}</h3>

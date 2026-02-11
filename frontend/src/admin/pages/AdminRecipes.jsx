@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getAllRecipes, deleteRecipe } from '../../api';
 import { useToast } from '../../contexts';
 import { useDocumentTitle } from '../../utils/useDocumentTitle';
 import { useScrollToTop } from '../../utils/useScrollToTop';
 import { Button, BackButton, useConfirm } from '../../components';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function AdminRecipes() {
   useDocumentTitle('Admin - Recipes');
   useScrollToTop();
   
+  const navigate = useNavigate();
   const toast = useToast();
   const confirm = useConfirm();
   const [recipes, setRecipes] = useState([]);
@@ -103,14 +107,14 @@ export default function AdminRecipes() {
                 key={recipe.id}
                 className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
               >
-                <div className="flex items-start gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                   {/* Image */}
-                  <div className="w-24 h-24 flex-shrink-0 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg flex items-center justify-center overflow-hidden mx-auto sm:mx-0">
                     {recipe.image ? (
                       <img
-                        src={`http://localhost:5000${recipe.image}`}
+                        src={`${API_URL}${recipe.image}`}
                         alt={recipe.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                       />
                     ) : (
                       <span className="text-4xl">🍽️</span>
@@ -119,19 +123,19 @@ export default function AdminRecipes() {
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="flex-1 min-w-0">
                         <h3 className="text-lg font-semibold text-gray-800 truncate">
                           {recipe.title}
                         </h3>
                         <p className="text-sm text-gray-600 line-clamp-1">{recipe.description}</p>
                       </div>
-                      <span className={`ml-4 px-2 py-1 rounded-lg text-xs font-medium whitespace-nowrap ${getDifficultyColor(recipe.difficulty)}`}>
+                      <span className={`px-2 py-1 rounded-lg text-xs font-medium whitespace-nowrap ${getDifficultyColor(recipe.difficulty)}`}>
                         {recipe.difficulty}
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-3">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-gray-500 mb-3">
                       <span className="bg-gray-100 px-2 py-1 rounded">{recipe.category}</span>
                       {recipe.prep_time && <span>⏱️ {recipe.prep_time}m prep</span>}
                       {recipe.cook_time && <span>🔥 {recipe.cook_time}m cook</span>}
@@ -139,19 +143,19 @@ export default function AdminRecipes() {
                     </div>
 
                     {recipe.user && (
-                      <div className="flex items-center gap-2 text-sm mb-3">
-                        <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                      <div className="flex items-center gap-2 text-sm mb-3 flex-wrap">
+                        <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                           {recipe.user.name?.charAt(0)?.toUpperCase() || 'U'}
                         </div>
                         <span className="text-gray-600">
                           by <span className="font-medium">{recipe.user.name}</span>
                         </span>
-                        <span className="text-gray-400">•</span>
-                        <span className="text-gray-500">{recipe.user.email}</span>
+                        <span className="text-gray-400 hidden sm:inline">•</span>
+                        <span className="text-gray-500 truncate max-w-[200px] hidden sm:inline">{recipe.user.email}</span>
                       </div>
                     )}
 
-                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                    <div className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
                       <span>Created: {new Date(recipe.createdAt).toLocaleDateString()}</span>
                       {recipe.updatedAt !== recipe.createdAt && (
                         <>
@@ -163,18 +167,18 @@ export default function AdminRecipes() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex flex-col gap-2">
+                  <div className="flex sm:flex-col gap-2 mt-2 sm:mt-0">
                     <Button
-                      onClick={() => window.open(`/recipes/${recipe.id}`, '_blank')}
+                      onClick={() => navigate(`/recipes/${recipe.id}`)}
                       variant="secondary"
-                      className="text-sm px-3 py-1"
+                      className="text-sm px-3 py-1 flex-1 sm:flex-none"
                     >
                       View
                     </Button>
                     <Button
                       onClick={() => handleDelete(recipe.id, recipe.title)}
                       variant="secondary"
-                      className="text-sm px-3 py-1 bg-red-50 text-red-600 hover:bg-red-100"
+                      className="text-sm px-3 py-1 bg-red-50 text-red-600 hover:bg-red-100 flex-1 sm:flex-none"
                     >
                       Delete
                     </Button>

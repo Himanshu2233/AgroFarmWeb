@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useDocumentTitle } from '../../utils';
 
 export default function AboutUs() {
+  useDocumentTitle('About Us');
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {

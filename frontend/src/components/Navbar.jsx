@@ -360,6 +360,7 @@ export default function Navbar() {
                 { to: '/admin/animals', label: 'Animals', icon: '🐄' },
                 { to: '/admin/bookings', label: 'Bookings', icon: '📅' },
                 { to: '/admin/users', label: 'Users', icon: '👥' },
+                { to: '/admin/reviews', label: 'Reviews', icon: '⭐' },
               ].map((link) => (
                 <Link 
                   key={link.to}

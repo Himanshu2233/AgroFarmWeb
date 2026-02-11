@@ -441,7 +441,7 @@ export default function AdminProducts() {
                         <img
                           src={imagePreview}
                           alt="Preview"
-                          className="w-20 h-20 object-cover rounded-xl border-2 border-gray-200"
+                          className="w-20 h-20 object-contain rounded-xl border-2 border-gray-200"
                         />
                         <button
                           type="button"
@@ -609,7 +609,7 @@ export default function AdminProducts() {
                   <img
                     src={`${API_URL}${product.image}`}
                     alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
                   <span className="text-6xl group-hover:scale-110 transition-transform duration-300">{product.emoji || '🌱'}</span>

@@ -8,6 +8,7 @@ export { default as Card } from './Card';
 export { default as ConfirmDialog } from './ConfirmDialog';
 export { ConfirmProvider } from './ConfirmProvider';
 export { useConfirm } from './useConfirm';
+export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as Footer } from './Footer';
 export { default as FormError, FieldError } from './FormError';
 export { default as Input } from './Input';

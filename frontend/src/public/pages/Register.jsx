@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useZodForm } from '../../utils';
+import { useZodForm, useDocumentTitle } from '../../utils';
 import { registerSchema } from '../schemas/auth.schema';
 import { FormError, FormProvider, FormInput, FormTextarea, SubmitButton } from '../../components';
 import API from '../../api/api.js';
@@ -32,6 +32,7 @@ const LockIcon = () => (
 );
 
 export default function Register() {
+  useDocumentTitle('Create Account');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, useToast } from '../../contexts';
-import { useZodForm } from '../../utils';
+import { useZodForm, useDocumentTitle } from '../../utils';
 import { loginSchema } from '../schemas/auth.schema';
 import { FormError, FormProvider, FormInput, SubmitButton } from '../../components';
 import API from '../../api/api.js';
@@ -26,10 +26,12 @@ const LoginIcon = () => (
 );
 
 export default function Login() {
+  useDocumentTitle('Login');
   const [error, setError] = useState('');
   const [needsVerification, setNeedsVerification] = useState(false);
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
   const [resending, setResending] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -51,7 +53,7 @@ export default function Login() {
     setNeedsVerification(false);
 
     try {
-      const response = await API.post('/auth/login', data);
+      const response = await API.post('/auth/login', { ...data, rememberMe });
       login(response.data.user, response.data.token);
       navigate('/');
     } catch (err) {
@@ -149,7 +151,16 @@ export default function Login() {
                   required
                 />
 
-                <div className="text-right">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 focus:ring-2 cursor-pointer"
+                    />
+                    <span className="text-sm text-gray-600">Remember me</span>
+                  </label>
                   <Link to="/forgot-password" className="text-green-600 text-sm hover:text-green-700 font-medium transition-colors">
                     Forgot Password?
                   </Link>

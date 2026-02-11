@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { getAllAnimals } from '../../api/animalService.js';
 import { useAuth } from '../../contexts';
 import { Pagination, SearchBar, AnimalEnquiryModal } from '../../components';
+import { useDocumentTitle } from '../../utils';
 
 export default function Animals() {
+  useDocumentTitle('Farm Animals');
   const [animals, setAnimals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -126,7 +128,7 @@ export default function Animals() {
               
               return (
                 <>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {paginatedAnimals.map((animal, index) => (
               <div
                 key={animal.id}

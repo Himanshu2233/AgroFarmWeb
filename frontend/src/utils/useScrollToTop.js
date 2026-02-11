@@ -8,7 +8,7 @@ import { useLocation } from 'react-router-dom';
  * @param {number} options.delay - Delay before scrolling (ms)
  */
 export function useScrollToTop(options = {}) {
-  const { behavior = 'smooth', delay = 0 } = options;
+  const { behavior = 'instant', delay = 0 } = options;
   const { pathname } = useLocation();
 
   useEffect(() => {

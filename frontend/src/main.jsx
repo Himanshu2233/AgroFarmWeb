@@ -6,11 +6,13 @@ import { AuthProvider, ToastProvider } from './contexts';
 import { ConfirmProvider } from './components';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <AuthProvider>
-    <ToastProvider>
-      <ConfirmProvider>
-        <App />
-      </ConfirmProvider>
-    </ToastProvider>
-  </AuthProvider>
+  <React.StrictMode>
+    <AuthProvider>
+      <ToastProvider>
+        <ConfirmProvider>
+          <App />
+        </ConfirmProvider>
+      </ToastProvider>
+    </AuthProvider>
+  </React.StrictMode>
 );

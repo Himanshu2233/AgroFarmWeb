@@ -45,7 +45,8 @@ export default function RecipeForm({ recipe, onClose, onSuccess }) {
         image: null
       });
       if (recipe.image) {
-        setImagePreview(`http://localhost:5000${recipe.image}`);
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        setImagePreview(`${apiUrl}${recipe.image}`);
       }
     }
   }, [recipe]);
@@ -137,7 +138,7 @@ export default function RecipeForm({ recipe, onClose, onSuccess }) {
   };
 
   return (
-    <Modal isOpen={true} onClose={onClose} size="large">
+    <Modal isOpen={true} onClose={onClose} size="xl">
       <Modal.Header>
         <Modal.Title>{recipe ? 'Edit Recipe' : 'Share Your Recipe'}</Modal.Title>
       </Modal.Header>

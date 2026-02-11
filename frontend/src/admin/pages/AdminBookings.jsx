@@ -4,6 +4,8 @@ import { useToast } from '../../contexts';
 import { Pagination, Modal, BackButton, OrderDetailsModal, useConfirm } from '../../components';
 import { useScrollToTop, useDocumentTitle } from '../../utils';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function AdminBookings() {
   useScrollToTop();
   useDocumentTitle('Admin - Bookings');
@@ -249,12 +251,16 @@ export default function AdminBookings() {
                   <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                     {/* Item Info */}
                     <div className="flex items-start gap-4 flex-1">
-                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-lg group-hover:scale-105 transition-transform ${
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform overflow-hidden ${
                         isAnimal 
                           ? 'bg-gradient-to-br from-orange-100 to-amber-100' 
                           : 'bg-gradient-to-br from-green-100 to-emerald-100'
                       }`}>
-                        {item?.emoji || (isAnimal ? '🐄' : '🌱')}
+                        {item?.image ? (
+                          <img src={`${API_URL}${item.image}`} alt={item.name} className="w-full h-full object-contain" />
+                        ) : (
+                          <span className="text-3xl">{item?.emoji || (isAnimal ? '🐄' : '🌱')}</span>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -280,9 +286,13 @@ export default function AdminBookings() {
 
                     {/* Customer Info */}
                     <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl lg:min-w-[220px]">
-                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-violet-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-                        {booking.user?.name?.charAt(0).toUpperCase() || 'U'}
-                      </div>
+                      {booking.user?.profile_image ? (
+                        <img src={`${API_URL}${booking.user.profile_image}`} alt={booking.user.name} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                      ) : (
+                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-violet-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
+                          {booking.user?.name?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                      )}
                       <div className="min-w-0 flex-1">
                         <p className="font-medium text-gray-800 truncate">{booking.user?.name}</p>
                         <p className="text-gray-500 text-xs truncate">{booking.user?.phone || booking.user?.email}</p>

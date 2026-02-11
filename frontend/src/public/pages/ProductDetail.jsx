@@ -4,6 +4,7 @@ import { getProductById } from '../../api/productService.js';
 import { getProductRating } from '../../api/reviewService.js';
 import { useAuth } from '../../contexts';
 import { StarRating, Button, BookingModal, ReviewModal, ReviewsList, BackButton } from '../../components';
+import { useDocumentTitle } from '../../utils';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -18,6 +19,8 @@ export default function ProductDetail() {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewRefreshKey, setReviewRefreshKey] = useState(0);
+
+  useDocumentTitle(product ? product.name : 'Product Details');
 
   useEffect(() => {
     fetchProduct();
@@ -120,7 +123,7 @@ export default function ProductDetail() {
                 <img
                   src={`${API_URL}${product.image}`}
                   alt={product.name}
-                  className="w-full h-48 md:h-64 object-cover rounded-xl"
+                  className="w-full h-48 md:h-64 object-contain rounded-xl"
                 />
               ) : (
                 <span className="text-9xl">{product.emoji || '🌱'}</span>

@@ -3,6 +3,8 @@ import { createBooking } from '../api/bookingService';
 import { useToast } from '../contexts';
 import Modal from './Modal';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const SCHEDULE_OPTIONS = [
   { value: 'once', label: 'Once', description: 'One-time purchase' },
   { value: 'daily', label: 'Daily', description: 'Fresh delivery every day' },
@@ -113,7 +115,11 @@ export default function BookingModal({ product, onClose, onSuccess }) {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Product Info */}
           <div className="flex items-center gap-4 p-4 bg-green-50 rounded-xl">
-            <div className="text-4xl">{product.emoji || '🌱'}</div>
+            {product.image ? (
+              <img src={`${API_URL}${product.image}`} alt={product.name} className="w-14 h-14 rounded-xl object-contain" />
+            ) : (
+              <div className="text-4xl">{product.emoji || '🌱'}</div>
+            )}
             <div>
               <h3 className="font-semibold text-gray-800">{product.name}</h3>
               <p className="text-green-600 font-medium">Rs. {product.price} / {product.unit}</p>

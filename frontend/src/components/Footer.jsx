@@ -80,10 +80,10 @@ export default function Footer() {
       {/* Newsletter Section */}
       <div className="relative border-b border-green-700/50">
         <div className="max-w-6xl mx-auto px-6 py-12">
-          <div className="bg-gradient-to-r from-green-700/50 to-emerald-700/50 backdrop-blur-sm rounded-3xl p-8 md:p-12 border border-green-600/30">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-              <div className="text-center md:text-left">
-                <h3 className="text-2xl md:text-3xl font-bold mb-2 flex items-center justify-center md:justify-start gap-2">
+          <div className="bg-gradient-to-r from-green-700/50 to-emerald-700/50 backdrop-blur-sm rounded-3xl p-8 lg:p-12 border border-green-600/30">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+              <div className="text-center lg:text-left">
+                <h3 className="text-2xl md:text-3xl font-bold mb-2 flex items-center justify-center lg:justify-start gap-2">
                   <span className="text-3xl">📬</span>
                   Stay Fresh, Stay Updated!
                 </h3>
@@ -92,7 +92,7 @@ export default function Footer() {
                 </p>
               </div>
               
-              <form onSubmit={handleNewsletterSubmit} className="w-full md:w-auto">
+              <form onSubmit={handleNewsletterSubmit} className="w-full lg:w-auto">
                 <div className="flex flex-col sm:flex-row gap-3">
                   <div className="relative">
                     <input
