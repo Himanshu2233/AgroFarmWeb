@@ -1,5 +1,12 @@
+// HTML-encode to prevent XSS
+const escapeHtml = (str) => {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+};
+
 // Welcome & Verification Email
 export const verificationEmailTemplate = (name, verificationLink) => {
+  const safeName = escapeHtml(name);
   return `
     <!DOCTYPE html>
     <html>
@@ -20,7 +27,7 @@ export const verificationEmailTemplate = (name, verificationLink) => {
           <h1>🌾 Welcome to AgroFarm!</h1>
         </div>
         <div class="content">
-          <h2>Hello ${name}! 👋</h2>
+          <h2>Hello ${safeName}! 👋</h2>
           <p>Thank you for registering with AgroFarm. We're excited to have you on board!</p>
           <p>Please verify your email address by clicking the button below:</p>
           <center>
@@ -44,6 +51,7 @@ export const verificationEmailTemplate = (name, verificationLink) => {
 
 // Password Reset Email
 export const resetPasswordTemplate = (name, resetLink) => {
+  const safeName = escapeHtml(name);
   return `
     <!DOCTYPE html>
     <html>
@@ -65,7 +73,7 @@ export const resetPasswordTemplate = (name, resetLink) => {
           <h1>🔐 Password Reset Request</h1>
         </div>
         <div class="content">
-          <h2>Hello ${name}!</h2>
+          <h2>Hello ${safeName}!</h2>
           <p>We received a request to reset your password for your AgroFarm account.</p>
           <center>
             <a href="${resetLink}" class="button">🔑 Reset My Password</a>
@@ -88,6 +96,8 @@ export const resetPasswordTemplate = (name, resetLink) => {
 
 // Welcome Email (after verification)
 export const welcomeEmailTemplate = (name) => {
+  const safeName = escapeHtml(name);
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
   return `
     <!DOCTYPE html>
     <html>
@@ -109,7 +119,7 @@ export const welcomeEmailTemplate = (name) => {
           <h1>🎉 Email Verified!</h1>
         </div>
         <div class="content">
-          <h2>Congratulations ${name}!</h2>
+          <h2>Congratulations ${safeName}!</h2>
           <p>Your email has been verified successfully. You now have full access to AgroFarm!</p>
           
           <h3>What you can do now:</h3>
@@ -119,7 +129,7 @@ export const welcomeEmailTemplate = (name) => {
           <div class="feature"><span class="emoji">⭐</span> Write reviews for products</div>
           
           <center>
-            <a href="${process.env.FRONTEND_URL}" class="button">🛒 Start Shopping</a>
+            <a href="${frontendUrl}" class="button">🛒 Start Shopping</a>
           </center>
           
           <p>Happy Farming! 🌾</p>

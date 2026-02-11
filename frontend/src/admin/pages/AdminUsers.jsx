@@ -8,11 +8,15 @@ import {
   changeUserRole 
 } from '../../api/userService.js';
 import { useToast } from '../../contexts';
-import { Pagination, Button, BackButton } from '../../components';
-import { useScrollToTop } from '../../utils';
+import { Pagination, Button, BackButton, useConfirm } from '../../components';
+import { useScrollToTop, useDocumentTitle } from '../../utils';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function AdminUsers() {
   useScrollToTop();
+  useDocumentTitle('Admin - Users');
+  const confirm = useConfirm();
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -58,7 +62,13 @@ export default function AdminUsers() {
     const newRole = currentRole === 'admin' ? 'customer' : 'admin';
     const confirmMsg = `Change this user to ${newRole}?`;
     
-    if (!confirm(confirmMsg)) return;
+    const confirmed = await confirm({
+      title: 'Change User Role?',
+      message: confirmMsg,
+      confirmText: 'Change Role',
+      variant: 'warning',
+    });
+    if (!confirmed) return;
 
     try {
       await changeUserRole(id, newRole);
@@ -70,7 +80,13 @@ export default function AdminUsers() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+    const confirmed = await confirm({
+      title: 'Delete User?',
+      message: 'Are you sure you want to delete this user? This action cannot be undone.',
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
 
     try {
       await deleteUser(id);
@@ -284,13 +300,21 @@ export default function AdminUsers() {
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
                   {/* User Avatar & Info */}
                   <div className="flex items-center gap-4 flex-1">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold text-white shadow-lg ${
-                      user.role === 'admin' 
-                        ? 'bg-gradient-to-br from-purple-500 to-purple-700' 
-                        : 'bg-gradient-to-br from-green-500 to-emerald-600'
-                    }`}>
-                      {user.name.charAt(0).toUpperCase()}
-                    </div>
+                    {user.profile_image ? (
+                      <img 
+                        src={`${API_URL}${user.profile_image}`} 
+                        alt={user.name} 
+                        className={`w-14 h-14 rounded-2xl object-cover shadow-lg`}
+                      />
+                    ) : (
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold text-white shadow-lg ${
+                        user.role === 'admin' 
+                          ? 'bg-gradient-to-br from-purple-500 to-purple-700' 
+                          : 'bg-gradient-to-br from-green-500 to-emerald-600'
+                      }`}>
+                        {user.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-semibold text-gray-800 text-lg">{user.name}</h3>

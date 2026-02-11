@@ -3,7 +3,10 @@ import { createBooking } from '../api/bookingService';
 import { useToast } from '../contexts';
 import Modal from './Modal';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const SCHEDULE_OPTIONS = [
+  { value: 'once', label: 'Once', description: 'One-time purchase' },
   { value: 'daily', label: 'Daily', description: 'Fresh delivery every day' },
   { value: 'weekly', label: 'Weekly', description: 'Once a week delivery' },
   { value: 'monthly', label: 'Monthly', description: 'Once a month delivery' },
@@ -18,7 +21,7 @@ const DELIVERY_TIME_OPTIONS = [
 export default function BookingModal({ product, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
     quantity: 1,
-    schedule: 'weekly',
+    schedule: 'once',
     startDate: new Date().toISOString().split('T')[0],
     endDate: '',
     deliveryTime: 'morning',
@@ -43,6 +46,9 @@ export default function BookingModal({ product, onClose, onSuccess }) {
     
     let deliveries = 0;
     switch (formData.schedule) {
+      case 'once':
+        deliveries = 1;
+        break;
       case 'daily':
         deliveries = days;
         break;
@@ -56,7 +62,8 @@ export default function BookingModal({ product, onClose, onSuccess }) {
     return { days, deliveries };
   };
 
-  const duration = calculateDuration();
+  const isOnce = formData.schedule === 'once';
+  const duration = isOnce ? null : calculateDuration();
   const totalPrice = duration ? product.price * formData.quantity * duration.deliveries : product.price * formData.quantity;
 
   const handleSubmit = async (e) => {
@@ -64,16 +71,18 @@ export default function BookingModal({ product, onClose, onSuccess }) {
     setLoading(true);
     setError('');
 
-    if (!formData.endDate) {
-      setError('Please select an end date');
-      setLoading(false);
-      return;
-    }
+    if (!isOnce) {
+      if (!formData.endDate) {
+        setError('Please select an end date');
+        setLoading(false);
+        return;
+      }
 
-    if (new Date(formData.endDate) <= new Date(formData.startDate)) {
-      setError('End date must be after start date');
-      setLoading(false);
-      return;
+      if (new Date(formData.endDate) <= new Date(formData.startDate)) {
+        setError('End date must be after start date');
+        setLoading(false);
+        return;
+      }
     }
 
     try {
@@ -82,7 +91,7 @@ export default function BookingModal({ product, onClose, onSuccess }) {
         quantity: parseInt(formData.quantity),
         schedule_type: formData.schedule,
         start_date: formData.startDate,
-        end_date: formData.endDate,
+        end_date: isOnce ? formData.startDate : formData.endDate,
         delivery_time: formData.deliveryTime,
         notes: formData.notes,
       });
@@ -106,7 +115,11 @@ export default function BookingModal({ product, onClose, onSuccess }) {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Product Info */}
           <div className="flex items-center gap-4 p-4 bg-green-50 rounded-xl">
-            <div className="text-4xl">{product.emoji || '🌱'}</div>
+            {product.image ? (
+              <img src={`${API_URL}${product.image}`} alt={product.name} className="w-14 h-14 rounded-xl object-contain" />
+            ) : (
+              <div className="text-4xl">{product.emoji || '🌱'}</div>
+            )}
             <div>
               <h3 className="font-semibold text-gray-800">{product.name}</h3>
               <p className="text-green-600 font-medium">Rs. {product.price} / {product.unit}</p>
@@ -160,7 +173,7 @@ export default function BookingModal({ product, onClose, onSuccess }) {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Delivery Schedule
             </label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {SCHEDULE_OPTIONS.map((option) => (
                 <button
                   key={option.value}
@@ -180,10 +193,10 @@ export default function BookingModal({ product, onClose, onSuccess }) {
           </div>
 
           {/* Date Range */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className={`grid ${isOnce ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Start Date
+                {isOnce ? 'Delivery Date' : 'Start Date'}
               </label>
               <input
                 type="date"
@@ -195,20 +208,22 @@ export default function BookingModal({ product, onClose, onSuccess }) {
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                End Date
-              </label>
-              <input
-                type="date"
-                name="endDate"
-                value={formData.endDate}
-                onChange={handleChange}
-                min={formData.startDate || new Date().toISOString().split('T')[0]}
-                required
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-            </div>
+            {!isOnce && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  End Date
+                </label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={formData.endDate}
+                  onChange={handleChange}
+                  min={formData.startDate || new Date().toISOString().split('T')[0]}
+                  required
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+            )}
           </div>
 
           {/* Preferred Delivery Time */}

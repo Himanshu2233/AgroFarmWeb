@@ -12,14 +12,16 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Verify connection
-transporter.verify((error, success) => {
-  if (error) {
-    console.log('❌ Email config error:', error.message);
-  } else {
-    console.log('✅ Email server ready');
-  }
-});
+// Verify connection (only if email credentials are configured)
+if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+  transporter.verify((error, success) => {
+    if (error) {
+      console.log('❌ Email config error:', error.message);
+    } else {
+      console.log('✅ Email server ready');
+    }
+  });
+}
 
 // Send email function
 export const sendEmail = async ({ to, subject, html }) => {

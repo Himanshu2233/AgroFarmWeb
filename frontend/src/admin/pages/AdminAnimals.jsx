@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getAllAnimals, createAnimal, updateAnimal, deleteAnimal } from '../../api/animalService.js';
 import { useToast } from '../../contexts';
-import { Pagination, Button, BackButton } from '../../components';
-import { useScrollToTop } from '../../utils';
+import { Pagination, Button, BackButton, useConfirm } from '../../components';
+import { useScrollToTop, useDocumentTitle } from '../../utils';
 
 export default function AdminAnimals() {
   useScrollToTop();
+  useDocumentTitle('Admin - Animals');
+  const confirm = useConfirm();
   const [animals, setAnimals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -81,7 +83,13 @@ export default function AdminAnimals() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this animal?')) return;
+    const confirmed = await confirm({
+      title: 'Delete Animal?',
+      message: 'Are you sure you want to delete this animal? This action cannot be undone.',
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
     try {
       await deleteAnimal(id);
       fetchAnimals();

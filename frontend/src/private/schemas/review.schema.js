@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { commentSchema } from './common.schema';
+import { commentSchema } from '../../public/schemas/common.schema';
 
 /**
  * Review Validation Schemas

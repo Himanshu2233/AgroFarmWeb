@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import Modal from './Modal';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function OrderDetailsModal({ booking, onClose, isAdmin = false, onStatusUpdate }) {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const isAnimal = booking.booking_type === 'animal';
@@ -52,7 +54,7 @@ export default function OrderDetailsModal({ booking, onClose, isAdmin = false, o
   const availableStatuses = ['pending', 'approved', 'active', 'completed', 'cancelled'];
 
   return (
-    <Modal isOpen={true} onClose={onClose} size="large">
+    <Modal isOpen={true} onClose={onClose} size="xl">
       <Modal.Header>
         <Modal.Title>
           {isAnimal ? 'Animal Enquiry Details' : 'Booking Details'}
@@ -66,12 +68,16 @@ export default function OrderDetailsModal({ booking, onClose, isAdmin = false, o
               ? 'bg-gradient-to-r from-orange-50 to-amber-50' 
               : 'bg-gradient-to-r from-green-50 to-emerald-50'
           }`}>
-            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center text-5xl shadow-lg ${
+            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden ${
               isAnimal 
                 ? 'bg-gradient-to-br from-orange-100 to-amber-100' 
                 : 'bg-gradient-to-br from-green-100 to-emerald-100'
             }`}>
-              {item?.emoji || (isAnimal ? '🐄' : '🌱')}
+              {item?.image ? (
+                <img src={`${API_URL}${item.image}`} alt={item.name} className="w-full h-full object-contain" />
+              ) : (
+                <span className="text-5xl">{item?.emoji || (isAnimal ? '🐄' : '🌱')}</span>
+              )}
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
@@ -151,6 +157,19 @@ export default function OrderDetailsModal({ booking, onClose, isAdmin = false, o
                 Customer Information
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2 flex items-center gap-3 mb-2">
+                  {booking.user.profile_image ? (
+                    <img src={`${API_URL}${booking.user.profile_image}`} alt={booking.user.name} className="w-12 h-12 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                      {booking.user.name?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-semibold text-gray-800 text-lg">{booking.user.name}</p>
+                    <p className="text-gray-500 text-sm">{booking.user.email}</p>
+                  </div>
+                </div>
                 <div>
                   <p className="text-gray-600 text-sm">Name</p>
                   <p className="font-semibold text-gray-800">{booking.user.name}</p>

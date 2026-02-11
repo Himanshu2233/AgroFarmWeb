@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useZodForm } from '../../utils';
+import { useZodForm, useDocumentTitle } from '../../utils';
 import { forgotPasswordSchema } from '../schemas/auth.schema';
-import { FormError } from '../../components';
+import { FormError, FormProvider, FormInput, SubmitButton } from '../../components';
 import API from '../../api/api.js';
 
 // Icons
@@ -19,6 +19,7 @@ const KeyIcon = () => (
 );
 
 export default function ForgotPassword() {
+  useDocumentTitle('Forgot Password');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState('');

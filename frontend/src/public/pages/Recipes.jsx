@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllRecipes } from '../api';
-import { useAuth, useToast } from '../contexts';
-import { useDocumentTitle } from '../utils/useDocumentTitle';
-import { useScrollToTop } from '../utils/useScrollToTop';
-import { Button, RecipeForm } from '../components';
+import { getAllRecipes } from '../../api';
+import { useAuth, useToast } from '../../contexts';
+import { useDocumentTitle } from '../../utils/useDocumentTitle';
+import { useScrollToTop } from '../../utils/useScrollToTop';
+import { RecipeForm } from '../../components';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const CATEGORIES = ['All', 'Salad', 'Soup', 'Main Course', 'Side Dish', 'Dessert', 'Breakfast', 'Other'];
 const DIFFICULTIES = ['All', 'Easy', 'Medium', 'Hard'];
@@ -51,8 +53,8 @@ export default function Recipes() {
 
     if (searchTerm) {
       filtered = filtered.filter(recipe =>
-        recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        recipe.description.toLowerCase().includes(searchTerm.toLowerCase())
+        recipe.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (recipe.description || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -78,11 +80,16 @@ export default function Recipes() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-rose-50/20">
+        <div className="bg-gradient-to-r from-rose-400 via-pink-400 to-orange-300 text-white py-12 px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="h-10 bg-white/20 rounded w-1/3 mb-3"></div>
+            <div className="h-5 bg-white/15 rounded w-1/2"></div>
+          </div>
+        </div>
+        <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="animate-pulse space-y-8">
-            <div className="h-12 bg-gray-200 rounded w-1/3"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map(i => (
                 <div key={i} className="h-80 bg-gray-200 rounded-xl"></div>
               ))}
@@ -94,35 +101,40 @@ export default function Recipes() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-rose-50/20">
+      {/* Hero Banner */}
+      <div className="bg-gradient-to-r from-rose-400 via-pink-400 to-orange-300 text-white py-12 px-6">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">🍽️ Farm Recipes</h1>
-            <p className="text-gray-600">Discover delicious recipes using fresh farm products</p>
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-4xl">🍽️</span>
+              <h1 className="text-3xl md:text-4xl font-bold">Farm Recipes</h1>
+            </div>
+            <p className="text-rose-50 text-lg">Discover delicious recipes using fresh farm products</p>
           </div>
           {user && (
-            <Button
+            <button
               onClick={() => setShowCreateModal(true)}
-              className="mt-4 md:mt-0"
+              className="px-5 py-2.5 bg-white text-pink-600 font-semibold rounded-xl hover:bg-pink-50 shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
             >
               Share Your Recipe
-            </Button>
+            </button>
           )}
         </div>
+      </div>
 
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Search and Filters */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Search */}
-            <div className="md:col-span-3">
+            <div className="sm:col-span-3">
               <input
                 type="text"
                 placeholder="🔍 Search recipes..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-300 focus:border-transparent"
               />
             </div>
 
@@ -132,7 +144,7 @@ export default function Recipes() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-300"
               >
                 {CATEGORIES.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
@@ -146,7 +158,7 @@ export default function Recipes() {
               <select
                 value={selectedDifficulty}
                 onChange={(e) => setSelectedDifficulty(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-300"
               >
                 {DIFFICULTIES.map(diff => (
                   <option key={diff} value={diff}>{diff}</option>
@@ -171,7 +183,7 @@ export default function Recipes() {
             <p className="text-gray-600">Try adjusting your search or filters</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredRecipes.map(recipe => (
               <div
                 key={recipe.id}
@@ -179,12 +191,12 @@ export default function Recipes() {
                 className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
               >
                 {/* Image */}
-                <div className="h-48 bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center overflow-hidden">
+                <div className="h-48 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
                   {recipe.image ? (
                     <img
-                      src={`http://localhost:5000${recipe.image}`}
+                      src={`${API_URL}${recipe.image}`}
                       alt={recipe.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   ) : (
                     <span className="text-6xl">🍽️</span>
@@ -192,9 +204,9 @@ export default function Recipes() {
                 </div>
 
                 {/* Content */}
-                <div className="p-5">
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-gray-800 flex-1">{recipe.title}</h3>
+                <div className="p-4 sm:p-5">
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <h3 className="text-lg font-semibold text-gray-800 flex-1 min-w-0 truncate">{recipe.title}</h3>
                     <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getDifficultyColor(recipe.difficulty)}`}>
                       {recipe.difficulty}
                     </span>

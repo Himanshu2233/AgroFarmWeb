@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { nameSchema, descriptionSchema, priceSchema, quantitySchema } from './common.schema';
+import { nameSchema, descriptionSchema, priceSchema, quantitySchema } from '../../public/schemas/common.schema';
 
 /**
  * Animal Validation Schemas

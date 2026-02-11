@@ -1,8 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts';
+import { useDocumentTitle } from '../../utils';
 
 export default function Home() {
+  useDocumentTitle('Home');
   const [isVisible, setIsVisible] = useState(false);
+  const { user } = useAuth();
   
   useEffect(() => {
     setIsVisible(true);
@@ -245,27 +249,52 @@ export default function Home() {
             
             <div className="relative z-10">
               <h2 className="text-3xl sm:text-4xl font-bold mb-4 font-display">
-                Ready to Get Started?
+                {user ? 'Explore Our Farm Fresh Products!' : 'Ready to Get Started?'}
               </h2>
               <p className="text-green-100 mb-8 max-w-xl mx-auto">
-                Join thousands of happy customers who trust AgroFarm for their daily fresh produce needs.
+                {user 
+                  ? 'Browse our latest collection of fresh farm products and book your favorites today.'
+                  : 'Join thousands of happy customers who trust AgroFarm for their daily fresh produce needs.'
+                }
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  to="/register"
-                  className="inline-flex items-center justify-center gap-2 bg-white text-green-700 hover:bg-green-50 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
-                >
-                  Create Account
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </Link>
-                <Link
-                  to="/products"
-                  className="inline-flex items-center justify-center gap-2 bg-transparent border-2 border-white/30 hover:bg-white/10 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300"
-                >
-                  View Products
-                </Link>
+                {user ? (
+                  <>
+                    <Link
+                      to="/products"
+                      className="inline-flex items-center justify-center gap-2 bg-white text-green-700 hover:bg-green-50 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+                    >
+                      Browse Products
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </Link>
+                    <Link
+                      to="/bookings"
+                      className="inline-flex items-center justify-center gap-2 bg-transparent border-2 border-white/30 hover:bg-white/10 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300"
+                    >
+                      My Bookings
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/register"
+                      className="inline-flex items-center justify-center gap-2 bg-white text-green-700 hover:bg-green-50 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+                    >
+                      Create Account
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </Link>
+                    <Link
+                      to="/products"
+                      className="inline-flex items-center justify-center gap-2 bg-transparent border-2 border-white/30 hover:bg-white/10 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300"
+                    >
+                      View Products
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>

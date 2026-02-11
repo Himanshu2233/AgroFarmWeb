@@ -2,9 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMyBookings, cancelBooking } from '../../api/bookingService.js';
 import { useAuth, useToast } from '../../contexts';
-import { SearchBar, Modal, BackButton, OrderDetailsModal } from '../../components';
+import { SearchBar, Modal, BackButton, OrderDetailsModal, useConfirm } from '../../components';
+import { useDocumentTitle } from '../../utils';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function Bookings() {
+  useDocumentTitle('My Bookings');
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -15,6 +19,7 @@ export default function Bookings() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
+  const confirm = useConfirm();
 
   useEffect(() => {
     if (!user) {
@@ -41,7 +46,14 @@ export default function Bookings() {
   };
 
   const handleCancel = async (id) => {
-    if (!confirm('Are you sure you want to cancel this booking?')) return;
+    const confirmed = await confirm({
+      title: 'Cancel Booking?',
+      message: 'Are you sure you want to cancel this booking? This action cannot be undone.',
+      confirmText: 'Yes, Cancel',
+      cancelText: 'Keep Booking',
+      variant: 'warning',
+    });
+    if (!confirmed) return;
 
     try {
       await cancelBooking(id);
@@ -151,7 +163,7 @@ export default function Bookings() {
                 value={searchTerm}
                 onChange={setSearchTerm}
                 placeholder="Search bookings by item name..."
-                colorVariant="green"
+                color="green"
               />
             </div>
 
@@ -205,12 +217,16 @@ export default function Bookings() {
                       <div className="flex flex-col md:flex-row md:items-start gap-4">
                         {/* Item Info */}
                         <div className="flex items-start gap-4 flex-1">
-                          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-4xl shadow-lg group-hover:scale-105 transition-transform ${
+                          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform overflow-hidden ${
                             isAnimal 
                               ? 'bg-gradient-to-br from-orange-100 to-amber-100' 
                               : 'bg-gradient-to-br from-green-100 to-emerald-100'
                           }`}>
-                            {item?.emoji || (isAnimal ? '🐄' : '🌱')}
+                            {item?.image ? (
+                              <img src={`${API_URL}${item.image}`} alt={item.name} className="w-full h-full object-contain" />
+                            ) : (
+                              <span className="text-4xl">{item?.emoji || (isAnimal ? '🐄' : '🌱')}</span>
+                            )}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap mb-1">

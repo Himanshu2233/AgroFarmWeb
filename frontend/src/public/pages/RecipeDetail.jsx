@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getRecipe, deleteRecipe } from '../api';
-import { useAuth, useToast } from '../contexts';
-import { useDocumentTitle } from '../utils/useDocumentTitle';
-import { useScrollToTop } from '../utils/useScrollToTop';
-import { Button, BackButton } from '../components';
+import { getRecipe, deleteRecipe } from '../../api';
+import { useAuth, useToast } from '../../contexts';
+import { useDocumentTitle } from '../../utils/useDocumentTitle';
+import { useScrollToTop } from '../../utils/useScrollToTop';
+import { Button, BackButton, useConfirm } from '../../components';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function RecipeDetail() {
   useScrollToTop();
@@ -13,6 +15,7 @@ export default function RecipeDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const toast = useToast();
+  const confirm = useConfirm();
   
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -39,7 +42,14 @@ export default function RecipeDetail() {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this recipe?')) return;
+    const confirmed = await confirm({
+      title: 'Delete Recipe?',
+      message: 'Are you sure you want to delete this recipe? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
 
     try {
       setDeleting(true);
@@ -95,12 +105,12 @@ export default function RecipeDetail() {
 
         {/* Hero Image */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-          <div className="h-80 bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
+          <div className="h-48 sm:h-64 md:h-80 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
             {recipe.image ? (
               <img
-                src={`http://localhost:5000${recipe.image}`}
+                src={`${API_URL}${recipe.image}`}
                 alt={recipe.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             ) : (
               <span className="text-9xl">🍽️</span>
@@ -109,11 +119,11 @@ export default function RecipeDetail() {
         </div>
 
         {/* Recipe Info */}
-        <div className="bg-white rounded-xl shadow-sm p-8 mb-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">{recipe.title}</h1>
-              <p className="text-gray-600">{recipe.description}</p>
+        <div className="bg-white rounded-xl shadow-sm p-5 sm:p-8 mb-6">
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">{recipe.title}</h1>
+              <p className="text-gray-600 text-sm sm:text-base">{recipe.description}</p>
             </div>
             <span className={`px-3 py-1 rounded-lg text-sm font-medium ${getDifficultyColor(recipe.difficulty)}`}>
               {recipe.difficulty}
@@ -121,7 +131,7 @@ export default function RecipeDetail() {
           </div>
 
           {/* Meta Info */}
-          <div className="flex flex-wrap gap-6 py-4 border-y border-gray-200">
+          <div className="flex flex-wrap gap-4 sm:gap-6 py-4 border-y border-gray-200">
             {recipe.prep_time && (
               <div className="flex items-center gap-2">
                 <span className="text-2xl">⏱️</span>
@@ -187,8 +197,8 @@ export default function RecipeDetail() {
         </div>
 
         {/* Ingredients */}
-        <div className="bg-white rounded-xl shadow-sm p-8 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <div className="bg-white rounded-xl shadow-sm p-5 sm:p-8 mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
             <span>🥬</span> Ingredients
           </h2>
           <ul className="space-y-2">
@@ -206,8 +216,8 @@ export default function RecipeDetail() {
         </div>
 
         {/* Instructions */}
-        <div className="bg-white rounded-xl shadow-sm p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <div className="bg-white rounded-xl shadow-sm p-5 sm:p-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
             <span>📝</span> Instructions
           </h2>
           <div className="prose max-w-none">

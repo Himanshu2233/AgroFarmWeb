@@ -26,6 +26,14 @@ const Review = sequelize.define('Review', {
   comment: {
     type: DataTypes.TEXT,
     allowNull: true
+  },
+  admin_reply: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  admin_reply_at: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   tableName: 'reviews',

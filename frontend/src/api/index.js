@@ -1,5 +1,5 @@
 // API Services
-export * from './api';
+export { default as API } from './api';
 export * from './authService';
 export * from './productService';
 export * from './animalService';

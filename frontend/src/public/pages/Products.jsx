@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { getAllProducts } from '../../api/productService.js';
 import { useAuth } from '../../contexts';
 import { Pagination, SearchBar, BookingModal } from '../../components';
+import { useDocumentTitle } from '../../utils';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function Products() {
+  useDocumentTitle('Farm Products');
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -170,7 +172,7 @@ export default function Products() {
           </div>
         ) : (
           <>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {paginatedProducts.map((product, index) => (
               <div
                 key={product.id}
@@ -184,7 +186,7 @@ export default function Products() {
                     <img
                       src={`${API_URL}${product.image}`}
                       alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
                     <span className="text-7xl group-hover:scale-110 transition-transform duration-300">{product.emoji || '🌱'}</span>

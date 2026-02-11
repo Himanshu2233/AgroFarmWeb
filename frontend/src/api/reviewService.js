@@ -35,3 +35,9 @@ export const getAllReviews = async () => {
   const response = await API.get('/reviews/all');
   return response.data;
 };
+
+// Reply to a review (admin)
+export const replyToReview = async (id, admin_reply) => {
+  const response = await API.put(`/reviews/${id}/reply`, { admin_reply });
+  return response.data;
+};

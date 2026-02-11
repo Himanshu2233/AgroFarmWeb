@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import API from '../../api/api.js';
+import { useDocumentTitle } from '../../utils';
 
 export default function VerifyEmail() {
+  useDocumentTitle('Verify Email');
   const { token } = useParams();
   const [status, setStatus] = useState('verifying'); // verifying, success, error
   const [message, setMessage] = useState('');

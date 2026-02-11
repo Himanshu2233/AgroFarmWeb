@@ -41,8 +41,8 @@ const createAnimal = async (req, res) => {
       description,
       age,
       weight,
-      price: parseFloat(price),
-      quantity: parseInt(quantity),
+      price: price !== undefined ? parseFloat(price) : 0,
+      quantity: quantity !== undefined ? parseInt(quantity, 10) : 0,
       emoji,
       image
     });
@@ -81,8 +81,8 @@ const updateAnimal = async (req, res) => {
       description,
       age,
       weight,
-      price: parseFloat(price),
-      quantity: parseInt(quantity),
+      price: price !== undefined ? parseFloat(price) : animal.price,
+      quantity: quantity !== undefined ? parseInt(quantity, 10) : animal.quantity,
       emoji,
       image
     });

@@ -161,7 +161,7 @@ const resendVerification = async (req, res) => {
 // Login (check verification)
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, rememberMe } = req.body;
 
     // Validate input
     const validation = validateLogin({ email, password });
@@ -200,11 +200,12 @@ const login = async (req, res) => {
     }
 
     // Generate JWT using jwt-util
+    const tokenExpiry = rememberMe ? '7d' : undefined;
     const token = generateToken({
       id: user.id,
       email: user.email,
       role: user.role,
-    });
+    }, tokenExpiry);
 
     res.json({
       message: "Login successful!",
@@ -216,6 +217,7 @@ const login = async (req, res) => {
         role: user.role,
         phone: user.phone,
         address: user.address,
+        profile_image: user.profile_image,
         is_verified: user.is_verified,
         createdAt: user.createdAt,
       },
@@ -267,6 +269,10 @@ const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
     const { password } = req.body;
+
+    if (!password || !isValidPassword(password)) {
+      return res.status(400).json({ message: "Password must be at least 6 characters with one uppercase, one lowercase, and one number" });
+    }
 
     const user = await User.findOne({ where: { reset_token: token } });
 
@@ -322,8 +328,13 @@ const updateProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // Validate email format if provided
+    if (email && !isValidEmail(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
     // Check if email is being changed and if it's already taken
-    if (email !== user.email) {
+    if (email && email !== user.email) {
       const existingUser = await User.findOne({ where: { email } });
       if (existingUser) {
         return res.status(400).json({ message: "Email already in use" });
@@ -332,9 +343,9 @@ const updateProfile = async (req, res) => {
 
     // Update user
     await user.update({ 
-      name, 
-      email, 
-      phone,
+      name: name || user.name, 
+      email: email || user.email, 
+      phone: phone || user.phone,
       address: address !== undefined ? address : user.address,
     });
 
@@ -347,6 +358,7 @@ const updateProfile = async (req, res) => {
         phone: user.phone,
         role: user.role,
         address: user.address,
+        profile_image: user.profile_image,
         is_verified: user.is_verified,
         createdAt: user.createdAt,
       },
@@ -372,6 +384,11 @@ const changePassword = async (req, res) => {
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    // Validate new password strength
+    if (!isValidPassword(newPassword)) {
+      return res.status(400).json({ message: "New password must be at least 6 characters with one uppercase, one lowercase, and one number" });
     }
 
     // Hash new password

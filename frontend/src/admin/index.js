@@ -4,3 +4,5 @@ export { default as AdminProducts } from './pages/AdminProducts';
 export { default as AdminAnimals } from './pages/AdminAnimals';
 export { default as AdminBookings } from './pages/AdminBookings';
 export { default as AdminUsers } from './pages/AdminUsers';
+export { default as AdminRecipes } from './pages/AdminRecipes';
+export { default as AdminReviews } from './pages/AdminReviews';

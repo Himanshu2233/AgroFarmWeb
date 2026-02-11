@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth, useToast } from '../../contexts';
-import { useZodForm } from '../../utils';
+import { useZodForm, useDocumentTitle } from '../../utils';
 import { updateProfileSchema, changePasswordSchema } from '../../public/schemas/auth.schema';
 import API from '../../api/api.js';
-import { BackButton, FormProvider, FormInput, FormTextarea, SubmitButton } from '../../components';
-import { getAllBookings } from '../../api/bookingService';
+import { BackButton, FormProvider, FormInput, FormTextarea, SubmitButton, useConfirm } from '../../components';
+import { getMyBookings } from '../../api/bookingService';
 
 // Icons
 const UserIcon = () => (
@@ -46,8 +47,10 @@ const TrashIcon = () => (
 );
 
 export default function Profile() {
-  const { user, login } = useAuth();
+  const { user, login, updateUser } = useAuth();
   const toast = useToast();
+  const confirm = useConfirm();
+  useDocumentTitle('My Profile');
   const [activeTab, setActiveTab] = useState('profile');
   const [message, setMessage] = useState({ type: '', text: '' });
   const [profileImage, setProfileImage] = useState(null);
@@ -100,7 +103,7 @@ export default function Profile() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const bookings = await getAllBookings();
+        const bookings = await getMyBookings();
         setStats({
           totalBookings: bookings.length,
           activeBookings: bookings.filter(b => ['pending', 'approved', 'active'].includes(b.status)).length,
@@ -124,7 +127,7 @@ export default function Profile() {
   const handleProfileUpdate = async (data) => {
     try {
       const response = await API.put('/auth/update-profile', data);
-      login(response.data.user, localStorage.getItem('token'));
+      updateUser(response.data.user);
       showMessage('success', 'Profile updated successfully!');
     } catch (error) {
       showMessage('error', error.response?.data?.message || 'Failed to update profile');
@@ -194,13 +197,18 @@ export default function Profile() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      return;
-    }
-    
-    const confirmation = prompt('Type "DELETE" to confirm account deletion:');
-    if (confirmation !== 'DELETE') {
-      showMessage('error', 'Account deletion cancelled');
+    const confirmed = await confirm({
+      title: 'Delete Your Account?',
+      message: 'This action cannot be undone. All your data, bookings, and profile information will be permanently removed.',
+      confirmText: 'Delete Account',
+      cancelText: 'Keep Account',
+      variant: 'danger',
+      showInput: true,
+      inputPlaceholder: 'Type DELETE to confirm',
+      inputMatch: 'DELETE',
+    });
+
+    if (!confirmed) {
       return;
     }
     
@@ -511,34 +519,34 @@ export default function Profile() {
                   <div className="mt-8 pt-8 border-t border-gray-200">
                     <h3 className="font-semibold text-gray-800 mb-4">Quick Actions</h3>
                     <div className="grid grid-cols-2 gap-4">
-                      <a
-                        href="/bookings"
+                      <Link
+                        to="/bookings"
                         className="p-4 bg-green-50 hover:bg-green-100 rounded-xl border border-green-200 transition-colors text-center"
                       >
                         <div className="text-2xl mb-2">📦</div>
                         <div className="font-medium text-green-700">View Orders</div>
-                      </a>
-                      <a
-                        href="/products"
+                      </Link>
+                      <Link
+                        to="/products"
                         className="p-4 bg-orange-50 hover:bg-orange-100 rounded-xl border border-orange-200 transition-colors text-center"
                       >
                         <div className="text-2xl mb-2">🛒</div>
                         <div className="font-medium text-orange-700">Shop Products</div>
-                      </a>
-                      <a
-                        href="/animals"
+                      </Link>
+                      <Link
+                        to="/animals"
                         className="p-4 bg-blue-50 hover:bg-blue-100 rounded-xl border border-blue-200 transition-colors text-center"
                       >
                         <div className="text-2xl mb-2">🐄</div>
                         <div className="font-medium text-blue-700">Browse Animals</div>
-                      </a>
-                      <a
-                        href="/"
+                      </Link>
+                      <Link
+                        to="/"
                         className="p-4 bg-purple-50 hover:bg-purple-100 rounded-xl border border-purple-200 transition-colors text-center"
                       >
                         <div className="text-2xl mb-2">🏠</div>
                         <div className="font-medium text-purple-700">Go Home</div>
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>

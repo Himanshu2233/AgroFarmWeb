@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { quantitySchema, futureDateSchema, notesSchema, messageSchema, ENUMS } from './common.schema';
+import { quantitySchema, futureDateSchema, notesSchema, messageSchema, ENUMS } from '../../public/schemas/common.schema';
 
 /**
  * Booking Validation Schemas

@@ -35,11 +35,8 @@ API.interceptors.response.use(
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         
-        // Only redirect if not already on login/register page
-        const currentPath = window.location.pathname;
-        if (!currentPath.includes('/login') && !currentPath.includes('/register')) {
-          window.location.href = '/login?session=expired';
-        }
+        // Dispatch custom event for React to handle (avoids full page reload)
+        window.dispatchEvent(new CustomEvent('auth:session-expired'));
       }
     }
     return Promise.reject(error);

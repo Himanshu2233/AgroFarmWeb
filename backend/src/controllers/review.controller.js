@@ -1,4 +1,5 @@
 import { Review, User, Product } from '../models/index.js';
+import { sequelize } from '../database/db.js';
 
 // Get reviews for a product
 const getProductReviews = async (req, res) => {
@@ -107,6 +108,11 @@ const updateReview = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
+    // Validate rating if provided
+    if (rating !== undefined && (rating < 1 || rating > 5)) {
+      return res.status(400).json({ message: 'Rating must be between 1 and 5' });
+    }
+
     await review.update({ rating, comment });
     res.json({ message: 'Review updated!', review });
   } catch (error) {
@@ -138,24 +144,43 @@ const deleteReview = async (req, res) => {
 // Get product average rating
 const getProductRating = async (req, res) => {
   try {
-    const reviews = await Review.findAll({
-      where: { product_id: req.params.productId }
+    const result = await Review.findOne({
+      where: { product_id: req.params.productId },
+      attributes: [
+        [sequelize.fn('AVG', sequelize.col('rating')), 'average'],
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+      ],
+      raw: true
     });
 
-    if (reviews.length === 0) {
-      return res.json({ average: 0, count: 0 });
-    }
-
-    const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
-    const average = (sum / reviews.length).toFixed(1);
-
     res.json({
-      average: parseFloat(average),
-      count: reviews.length
+      average: result.average ? parseFloat(parseFloat(result.average).toFixed(1)) : 0,
+      count: parseInt(result.count) || 0
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-export { getProductReviews, getAllReviews, createReview, updateReview, deleteReview, getProductRating };
+// Reply to a review (admin)
+const replyToReview = async (req, res) => {
+  try {
+    const { admin_reply } = req.body;
+    const review = await Review.findByPk(req.params.id);
+
+    if (!review) {
+      return res.status(404).json({ message: 'Review not found' });
+    }
+
+    await review.update({ 
+      admin_reply: admin_reply || null,
+      admin_reply_at: admin_reply ? new Date() : null
+    });
+    res.json({ message: 'Reply saved!', review });
+  } catch (error) {
+    console.error('Reply to review error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export { getProductReviews, getAllReviews, createReview, updateReview, deleteReview, getProductRating, replyToReview };

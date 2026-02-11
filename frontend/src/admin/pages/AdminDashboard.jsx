@@ -4,10 +4,13 @@ import { getAllProducts } from '../../api/productService.js';
 import { getAllAnimals } from '../../api/animalService.js';
 import { getAllBookings } from '../../api/bookingService.js';
 import { getAllUsers } from '../../api/userService.js';
-import { useScrollToTop } from '../../utils';
+import { useScrollToTop, useDocumentTitle } from '../../utils';
+import { useToast } from '../../contexts';
 
 export default function AdminDashboard() {
   useScrollToTop();
+  useDocumentTitle('Admin Dashboard');
+  const toast = useToast();
   const [stats, setStats] = useState({
     products: 0,
     animals: 0,
@@ -30,33 +33,12 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      console.log('Fetching admin dashboard stats...');
-      
       const [products, animals, bookings, users] = await Promise.all([
-        getAllProducts().catch(err => {
-          console.error('Failed to fetch products:', err);
-          return [];
-        }),
-        getAllAnimals().catch(err => {
-          console.error('Failed to fetch animals:', err);
-          return [];
-        }),
-        getAllBookings().catch(err => {
-          console.error('Failed to fetch bookings:', err);
-          return [];
-        }),
-        getAllUsers().catch(err => {
-          console.error('Failed to fetch users:', err);
-          return [];
-        })
+        getAllProducts().catch(() => []),
+        getAllAnimals().catch(() => []),
+        getAllBookings().catch(() => []),
+        getAllUsers().catch(() => [])
       ]);
-
-      console.log('Fetched data:', { 
-        products: products.length, 
-        animals: animals.length, 
-        bookings: bookings.length, 
-        users: users.length 
-      });
 
       const pendingBookings = bookings.filter(b => b.status === 'pending').length;
       const revenue = bookings
@@ -80,7 +62,7 @@ export default function AdminDashboard() {
       });
     } catch (error) {
       console.error('Failed to fetch stats:', error);
-      alert('Failed to load dashboard data. Please check console for details.');
+      toast.error('Failed to load dashboard data. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -134,8 +116,14 @@ export default function AdminDashboard() {
       .filter(b => b.booking_type === 'animal' && b.status !== 'cancelled')
       .reduce((sum, b) => sum + Number(b.total_price || 0), 0);
 
-    // Recent bookings trend (last 7 days simulation)
-    const recentBookingsTrend = [3, 5, 4, 7, 6, 8, bookings.filter(b => b.status === 'pending').length];
+    // Recent bookings trend (last 7 days based on actual data)
+    const now = new Date();
+    const recentBookingsTrend = Array.from({ length: 7 }, (_, i) => {
+      const day = new Date(now);
+      day.setDate(day.getDate() - (6 - i));
+      const dayStr = day.toISOString().slice(0, 10);
+      return bookings.filter(b => b.createdAt?.slice(0, 10) === dayStr).length;
+    });
 
     // Stock status
     const inStock = products.filter(p => p.stock > 10).length;
@@ -263,6 +251,14 @@ export default function AdminDashboard() {
       link: '/admin/recipes',
       stats: 'Community shared',
       gradient: 'from-pink-500 to-rose-600'
+    },
+    { 
+      title: 'Reviews', 
+      description: 'View and reply to customer reviews',
+      icon: '⭐',
+      link: '/admin/reviews',
+      stats: 'Customer feedback',
+      gradient: 'from-amber-500 to-orange-600'
     }
   ];
 
