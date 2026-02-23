@@ -48,6 +48,7 @@ export default {
         'slideInDown': 'slideInDown 0.3s ease-out',
         'slideInLeft': 'slideInLeft 0.3s ease-out',
         'slideInRight': 'slideInRight 0.3s ease-out',
+        'slideOutRight': 'slideOutRight 0.3s ease-in forwards',
         'modalSlideIn': 'modalSlideIn 0.3s ease-out',
         'scaleIn': 'scaleIn 0.2s ease-out',
         'bounce-slow': 'bounce 2s infinite',
@@ -79,6 +80,10 @@ export default {
         slideInRight: {
           '0%': { transform: 'translateX(20px)', opacity: '0' },
           '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        slideOutRight: {
+          '0%': { transform: 'translateX(0)', opacity: '1' },
+          '100%': { transform: 'translateX(100%)', opacity: '0' },
         },
         modalSlideIn: {
           '0%': { transform: 'scale(0.95) translateY(10px)', opacity: '0' },
