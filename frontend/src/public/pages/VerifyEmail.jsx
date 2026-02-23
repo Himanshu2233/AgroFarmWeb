@@ -32,8 +32,8 @@ export default function VerifyEmail() {
   }, [verifyEmail]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 flex items-center justify-center px-4">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center animate-fadeIn">
         {/* Verifying State */}
         {status === 'verifying' && (
           <>
@@ -51,7 +51,7 @@ export default function VerifyEmail() {
             <p className="text-gray-600 mb-6">{message}</p>
             <Link
               to="/login"
-              className="inline-block bg-green-800 hover:bg-green-700 text-white px-8 py-3 rounded-full font-medium transition"
+              className="inline-block bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 rounded-xl font-medium shadow-lg shadow-green-500/25 hover:shadow-xl transition-all hover:scale-105 active:scale-95"
             >
               🔐 Login Now
             </Link>
@@ -67,13 +67,13 @@ export default function VerifyEmail() {
             <div className="space-y-3">
               <Link
                 to="/register"
-                className="block w-full border-2 border-green-800 text-green-800 py-3 rounded-full hover:bg-green-800 hover:text-white transition"
+                className="block w-full border-2 border-green-600 text-green-700 py-3 rounded-xl hover:bg-green-600 hover:text-white transition-all hover:scale-105 active:scale-95 font-medium"
               >
                 Register Again
               </Link>
               <Link
                 to="/login"
-                className="block w-full bg-green-800 text-white py-3 rounded-full hover:bg-green-700 transition"
+                className="block w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 rounded-xl shadow-lg shadow-green-500/25 hover:shadow-xl transition-all hover:scale-105 active:scale-95 font-medium"
               >
                 Go to Login
               </Link>

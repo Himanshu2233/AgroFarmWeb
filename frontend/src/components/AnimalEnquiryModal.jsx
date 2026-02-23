@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth, useToast } from '../contexts';
 import { createBooking } from '../api/bookingService';
 import Modal from './Modal';
@@ -12,6 +13,7 @@ const PREFERRED_TIME_OPTIONS = [
 export default function AnimalEnquiryModal({ animal, onClose, onSuccess }) {
   const { user } = useAuth();
   const toast = useToast();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     quantity: 1,
     startDate: new Date().toISOString().split('T')[0],
@@ -20,6 +22,8 @@ export default function AnimalEnquiryModal({ animal, onClose, onSuccess }) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const hasAddress = user?.address?.trim();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -57,6 +61,26 @@ export default function AnimalEnquiryModal({ animal, onClose, onSuccess }) {
         <Modal.Title>Enquire About Animal</Modal.Title>
       </Modal.Header>
       <Modal.Body>
+        {!hasAddress && (
+          <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <div className="flex items-start gap-3">
+              <svg className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <div>
+                <p className="font-medium text-amber-800">Address required</p>
+                <p className="text-sm text-amber-600 mt-1">Please add your address before submitting an enquiry.</p>
+                <button
+                  type="button"
+                  onClick={() => { onClose(); navigate('/profile'); }}
+                  className="mt-2 text-sm font-medium text-amber-700 underline hover:text-amber-900 transition-colors"
+                >
+                  Go to Profile → Add Address
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Animal Info */}
           <div className="flex items-center gap-4 p-4 bg-orange-50 rounded-xl">
@@ -203,7 +227,7 @@ export default function AnimalEnquiryModal({ animal, onClose, onSuccess }) {
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !hasAddress}
               className="flex-1 py-3 px-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium rounded-xl hover:from-orange-600 hover:to-amber-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (

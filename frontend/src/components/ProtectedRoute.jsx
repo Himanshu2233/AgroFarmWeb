@@ -81,6 +81,7 @@ export const CustomerOnlyRoute = ({ children }) => {
  */
 export const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -91,7 +92,7 @@ export const AdminRoute = ({ children }) => {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   if (user.role !== 'admin') {

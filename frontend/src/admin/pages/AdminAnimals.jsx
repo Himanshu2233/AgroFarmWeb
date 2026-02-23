@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { getAllAnimals, createAnimal, updateAnimal, deleteAnimal } from '../../api/animalService.js';
 import { useToast } from '../../contexts';
 import { Pagination, Button, BackButton, useConfirm } from '../../components';
@@ -7,10 +8,11 @@ import { useScrollToTop, useDocumentTitle } from '../../utils';
 export default function AdminAnimals() {
   useScrollToTop();
   useDocumentTitle('Admin - Animals');
+  const location = useLocation();
   const confirm = useConfirm();
   const [animals, setAnimals] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(location.state?.openForm || false);
   const [editingAnimal, setEditingAnimal] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);

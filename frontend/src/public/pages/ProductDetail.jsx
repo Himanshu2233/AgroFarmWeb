@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getProductById } from '../../api/productService.js';
 import { getProductRating } from '../../api/reviewService.js';
 import { useAuth } from '../../contexts';
@@ -11,6 +11,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
 
   const [product, setProduct] = useState(null);
@@ -49,7 +50,7 @@ export default function ProductDetail() {
 
   const handleBookClick = () => {
     if (!user) {
-      navigate('/login');
+      navigate('/login', { state: { from: location } });
       return;
     }
     setShowBookingModal(true);
@@ -57,7 +58,7 @@ export default function ProductDetail() {
 
   const handleReviewClick = () => {
     if (!user) {
-      navigate('/login');
+      navigate('/login', { state: { from: location } });
       return;
     }
     setShowReviewModal(true);
