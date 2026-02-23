@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
 const ToastContext = createContext();
 
 // Toast component
-const Toast = ({ id, message, variant, onClose }) => {
+const Toast = ({ id, message, variant, onClose, isExiting }) => {
   const variants = {
     success: 'bg-emerald-500 text-white',
     error: 'bg-red-500 text-white',
@@ -40,7 +40,7 @@ const Toast = ({ id, message, variant, onClose }) => {
       className={`
         flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg
         ${variants[variant]}
-        animate-slideInRight
+        ${isExiting ? 'animate-slideOutRight' : 'animate-slideInRight'}
         min-w-[280px] max-w-md
       `}
     >
@@ -63,7 +63,7 @@ const ToastContainer = ({ toasts, removeToast }) => {
   if (toasts.length === 0) return null;
 
   return createPortal(
-    <div className="fixed top-4 right-4 z-[100] flex flex-col gap-2">
+    <div className="fixed top-4 right-4 z-[100] flex flex-col gap-2" aria-live="polite" aria-atomic="false">
       {toasts.map((toast) => (
         <Toast key={toast.id} {...toast} onClose={removeToast} />
       ))}
@@ -79,11 +79,20 @@ export function ToastProvider({ children }) {
   const addToast = useCallback((message, variant = 'info', duration = 4000) => {
     const id = Date.now() + Math.random();
     
-    setToasts((prev) => [...prev, { id, message, variant }]);
+    // Limit max toasts to 5
+    setToasts((prev) => {
+      const updated = [...prev, { id, message, variant, isExiting: false }];
+      return updated.length > 5 ? updated.slice(-5) : updated;
+    });
 
     if (duration > 0) {
       setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
+        // Start exit animation
+        setToasts((prev) => prev.map((t) => t.id === id ? { ...t, isExiting: true } : t));
+        // Remove after animation
+        setTimeout(() => {
+          setToasts((prev) => prev.filter((t) => t.id !== id));
+        }, 300);
       }, duration);
     }
 
@@ -91,7 +100,12 @@ export function ToastProvider({ children }) {
   }, []);
 
   const removeToast = useCallback((id) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+    // Start exit animation
+    setToasts((prev) => prev.map((t) => t.id === id ? { ...t, isExiting: true } : t));
+    // Remove after animation
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 300);
   }, []);
 
   const toast = {

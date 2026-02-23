@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getAllProducts } from '../../api/productService.js';
 import { useAuth } from '../../contexts';
 import { Pagination, SearchBar, BookingModal } from '../../components';
@@ -23,6 +23,7 @@ export default function Products() {
 
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     fetchProducts();
@@ -43,7 +44,7 @@ export default function Products() {
   const handleBookClick = (e, product) => {
     e.stopPropagation();
     if (!user) {
-      navigate('/login');
+      navigate('/login', { state: { from: location } });
       return;
     }
     setSelectedProduct(product);

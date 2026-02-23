@@ -1,7 +1,7 @@
 /**
  * AgroFarm Application Root
  */
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter, useLocation } from 'react-router-dom';
 import { Navbar, Footer } from './components';
 import AppRoutes from './routes';
@@ -17,6 +17,35 @@ function ScrollToTop() {
   return null;
 }
 
+// Page transition wrapper
+function PageTransition({ children }) {
+  const location = useLocation();
+  const [displayLocation, setDisplayLocation] = useState(location);
+  const [transitionStage, setTransitionStage] = useState('fadeIn');
+
+  useEffect(() => {
+    if (location.pathname !== displayLocation.pathname) {
+      setTransitionStage('fadeOut');
+    }
+  }, [location, displayLocation]);
+
+  return (
+    <div
+      className={`transition-opacity duration-200 ${
+        transitionStage === 'fadeIn' ? 'opacity-100' : 'opacity-0'
+      }`}
+      onTransitionEnd={() => {
+        if (transitionStage === 'fadeOut') {
+          setDisplayLocation(location);
+          setTransitionStage('fadeIn');
+        }
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -24,7 +53,9 @@ function App() {
       <div className="flex flex-col min-h-screen">
         <Navbar />
         <main className="flex-grow">
-          <AppRoutes />
+          <PageTransition>
+            <AppRoutes />
+          </PageTransition>
         </main>
         <Footer />
       </div>

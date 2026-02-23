@@ -88,6 +88,12 @@ const createBooking = async (req, res) => {
       return res.status(400).json({ message: 'Either product_id or animal_id is required' });
     }
 
+    // Check if user has an address on their profile
+    const user = await User.findByPk(req.user.id);
+    if (!user || !user.address || !user.address.trim()) {
+      return res.status(400).json({ message: 'Please add a delivery address to your profile before booking' });
+    }
+
     // Use transaction to prevent race conditions
     const t = await sequelize.transaction();
     try {

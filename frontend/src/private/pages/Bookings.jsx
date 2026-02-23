@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getMyBookings, cancelBooking } from '../../api/bookingService.js';
 import { useAuth, useToast } from '../../contexts';
 import { SearchBar, Modal, BackButton, OrderDetailsModal, useConfirm } from '../../components';
+import Pagination from '../../components/Pagination';
 import { useDocumentTitle } from '../../utils';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -15,15 +16,18 @@ export default function Bookings() {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const toast = useToast();
   const confirm = useConfirm();
 
   useEffect(() => {
     if (!user) {
-      navigate('/login');
+      navigate('/login', { state: { from: location } });
       return;
     }
     if (user.role === 'admin') {
@@ -97,6 +101,16 @@ export default function Bookings() {
     
     return matchesStatus && matchesSearch;
   });
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, searchTerm]);
+
+  const paginatedBookings = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredBookings.slice(start, start + itemsPerPage);
+  }, [filteredBookings, currentPage, itemsPerPage]);
 
   if (loading) {
     return (
@@ -201,7 +215,7 @@ export default function Bookings() {
                     {searchTerm ? `No bookings match "${searchTerm}"` : `No ${filter} bookings`}
                   </p>
                 </div>
-              ) : filteredBookings.map((booking, index) => {
+              ) : paginatedBookings.map((booking, index) => {
                 const isAnimal = booking.booking_type === 'animal';
                 const item = isAnimal ? booking.animal : booking.product;
                 const statusConfig = getStatusConfig(booking.status);
@@ -297,6 +311,20 @@ export default function Bookings() {
                 );
               })}
             </div>
+
+            {/* Pagination */}
+            {filteredBookings.length > 0 && (
+              <div className="mt-6">
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={filteredBookings.length}
+                  itemsPerPage={itemsPerPage}
+                  onPageChange={setCurrentPage}
+                  onItemsPerPageChange={setItemsPerPage}
+                  itemsPerPageOptions={[5, 10, 20, 50]}
+                />
+              </div>
+            )}
           </>
         )}
       </div>
