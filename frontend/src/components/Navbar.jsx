@@ -62,7 +62,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className={`sticky top-0 z-50 transition-all duration-300 ${
+    <nav aria-label="Main navigation" className={`sticky top-0 z-50 transition-all duration-300 ${
       isScrolled 
         ? 'bg-white/95 backdrop-blur-md shadow-lg' 
         : 'bg-gradient-to-r from-green-800 to-emerald-800 shadow-md'
@@ -113,6 +113,8 @@ export default function Navbar() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  aria-expanded={isDropdownOpen}
+                  aria-haspopup="true"
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${
                     isScrolled 
                       ? 'bg-green-100 hover:bg-green-200 text-green-800' 
@@ -277,6 +279,7 @@ export default function Navbar() {
             }`}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
+            aria-expanded={isMenuOpen}
           >
             {isMenuOpen ? (
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

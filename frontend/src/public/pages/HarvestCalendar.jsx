@@ -158,9 +158,20 @@ export default function HarvestCalendar() {
           </h2>
           
           {filteredProducts.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">🌾</div>
-              <p className="text-gray-600">No products available for this season</p>
+            <div className="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border border-gray-100">
+              <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-4xl">🌾</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">No products available</h3>
+              <p className="text-gray-500 mb-4">No products found for {selectedSeason === 'All' ? 'any season' : `${selectedSeason} season`}</p>
+              {selectedSeason !== 'All' && (
+                <button
+                  onClick={() => setSelectedSeason('All')}
+                  className="px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95"
+                >
+                  View All Seasons
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">

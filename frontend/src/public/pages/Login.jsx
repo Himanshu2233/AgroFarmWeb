@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, useToast } from '../../contexts';
 import { useZodForm, useDocumentTitle } from '../../utils';
 import { loginSchema } from '../schemas/auth.schema';
@@ -35,7 +35,11 @@ export default function Login() {
 
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const toast = useToast();
+
+  // Get the page user was trying to visit before being redirected to login
+  const from = location.state?.from?.pathname || '/';
 
   // React Hook Form with Zod validation
   const methods = useZodForm({
@@ -55,7 +59,7 @@ export default function Login() {
     try {
       const response = await API.post('/auth/login', { ...data, rememberMe });
       login(response.data.user, response.data.token);
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (err) {
       const responseData = err.response?.data;
       

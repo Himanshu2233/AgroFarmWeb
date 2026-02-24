@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { getAllProducts, createProduct, updateProduct, deleteProduct } from '../../api/productService.js';
 import { useToast } from '../../contexts';
 import { Pagination, Button, BackButton, useConfirm } from '../../components';
@@ -9,10 +10,11 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 export default function AdminProducts() {
   useScrollToTop();
   useDocumentTitle('Admin - Products');
+  const location = useLocation();
   const confirm = useConfirm();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(location.state?.openForm || false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
