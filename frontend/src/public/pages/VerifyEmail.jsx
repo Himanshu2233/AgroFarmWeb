@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import API from '../../api/api.js';
 import { useDocumentTitle } from '../../utils';
@@ -9,7 +9,7 @@ export default function VerifyEmail() {
   const [status, setStatus] = useState('verifying'); // verifying, success, error
   const [message, setMessage] = useState('');
 
-  const verifyEmail = useCallback(async () => {
+  useEffect(() => {
     // Don't run if no token
     if (!token) {
       setStatus('error');
@@ -17,19 +17,33 @@ export default function VerifyEmail() {
       return;
     }
 
-    try {
-      const response = await API.get(`/auth/verify-email/${token}`);
-      setStatus('success');
-      setMessage(response.data.message);
-    } catch (error) {
-      setStatus('error');
-      setMessage(error.response?.data?.message || 'Verification failed. The link may be expired or invalid.');
-    }
-  }, [token]);
+    let cancelled = false;
+    const controller = new AbortController();
 
-  useEffect(() => {
+    const verifyEmail = async () => {
+      try {
+        const response = await API.get(`/auth/verify-email/${token}`, {
+          signal: controller.signal,
+        });
+        if (!cancelled) {
+          setStatus('success');
+          setMessage(response.data.message);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setStatus('error');
+          setMessage(error.response?.data?.message || 'Verification failed. The link may be expired or invalid.');
+        }
+      }
+    };
+
     verifyEmail();
-  }, [verifyEmail]);
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [token]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 flex items-center justify-center px-4">

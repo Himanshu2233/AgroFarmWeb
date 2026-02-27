@@ -92,15 +92,20 @@ const verifyEmail = async (req, res) => {
       return res.status(400).json({ message: "Invalid verification link" });
     }
 
+    // If user is already verified (e.g., duplicate click or StrictMode double-request)
+    if (user.is_verified) {
+      return res.json({
+        message: "Email already verified! You can login.",
+      });
+    }
+
     if (user.verification_expires < new Date()) {
       return res.status(400).json({ message: "Verification link has expired" });
     }
 
-    // Update user as verified
+    // Update user as verified — keep token so duplicate requests can still find the user
     await user.update({
       is_verified: true,
-      verification_token: null,
-      verification_expires: null,
     });
 
     // Send welcome email
