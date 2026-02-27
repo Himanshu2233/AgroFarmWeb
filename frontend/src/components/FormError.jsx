@@ -1,3 +1,5 @@
+import { useFormContext } from 'react-hook-form';
+
 /**
  * FormError - Displays form error messages with styling
  */
@@ -19,7 +21,12 @@ export default function FormError({ message, className = '' }) {
 }
 
 // Field-level error component
-export function FieldError({ message }) {
+// Accepts either a `name` (auto-reads error from form context) or a direct `message`
+export function FieldError({ name, message: directMessage }) {
+  const { formState: { errors } } = useFormContext();
+  const contextError = name ? errors[name] : null;
+  const message = directMessage || contextError?.message;
+
   if (!message) return null;
 
   return (
